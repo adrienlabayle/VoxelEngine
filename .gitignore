@@ -1,0 +1,73 @@
+# ========================
+# Build folders
+# ========================
+build/
+Build/
+bin/
+out/
+
+# ========================
+# CMake
+# ========================
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+compile_commands.json
+
+# ========================
+# Compiled files
+# ========================
+*.o
+*.obj
+*.exe
+*.out
+*.app
+*.dll
+*.so
+*.dylib
+
+# ========================
+# Debug / logs
+# ========================
+*.log
+
+# ========================
+# IDEs
+# ========================
+
+## VS Code
+.vscode/
+
+## Visual Studio
+.vs/
+*.vcxproj*
+*.sln
+*.filters
+
+## CLion / JetBrains
+.idea/
+
+# ========================
+# OS files
+# ========================
+.DS_Store
+Thumbs.db
+
+# ========================
+# ImGui (optional settings)
+# ========================
+imgui.ini
+
+# ========================
+# Temporary files
+# ========================
+*.tmp
+*.temp
+
+# ========================
+# Assets (optionnel)
+# ========================
+# Si tu as des assets lourds (textures etc.)
+# tu peux les ignorer ici si besoin
+# assets/
