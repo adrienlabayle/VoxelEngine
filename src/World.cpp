@@ -17,11 +17,10 @@ World::World(int RenderDistance, std::shared_ptr<Atlas> Atlas, unsigned int Seed
 
 World::~World()
 {
-	m_Stopping = true;
+	m_Stopped = true;
 
-	// attendre que tous les jobs soient consommés
-	while (!m_JobQueue.Empty())
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	m_JobQueue.Stop();     // Wake up workers
+	m_ResultQueue.Stop();
 
 	for (auto& t : m_Workers)
 		if (t.joinable())
@@ -30,9 +29,6 @@ World::~World()
 
 void World::Load(const glm::vec3& CameraChunkPosition)
 {
-	if (m_Stopping)
-		return;
-
 	int ChunkX = floor(CameraChunkPosition.x / Chunk::m_XSize);
 	int ChunkZ = floor(CameraChunkPosition.z / Chunk::m_ZSize);
 
@@ -63,7 +59,7 @@ void World::Load(const glm::vec3& CameraChunkPosition)
 				auto newChunk = std::make_shared<Chunk>(pos.x, pos.z, *this);
 				m_Chunks[pos] = newChunk;
 
-				// Put the existing neighbors in "NeedRemesh" state
+				// Put the existing neighbors in "NeedRemesh" state (lambda)
 				auto markNeighbor = [&](int nx, int nz)
 					{
 						ChunkPosition p{ nx, nz };
@@ -193,21 +189,23 @@ void World::WorkerLoop()
 {
 	while (true)
 	{
-		if (m_Stopping && m_JobQueue.Empty())
+		auto jobOpt = m_JobQueue.Pop(); // BLOQUANT
+
+		// sécurité shutdown (si queue stop)
+		if (!jobOpt)
 			break;
 
-		auto jobOpt = m_JobQueue.TryPop();
-
-		if (!jobOpt)
-		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(1));
-			continue;
-		}
-
-		auto& job = *jobOpt;
+		auto job = std::move(*jobOpt);
 
 		Mesh mesh;
-		mesh.MeshFromChunk(m_Texture.get(), *job.center, job.left.get(), job.right.get(), job.front.get(), job.back.get());
+		mesh.MeshFromChunk(
+			m_Texture.get(),
+			*job.center,
+			job.left.get(),
+			job.right.get(),
+			job.front.get(),
+			job.back.get()
+		);
 
 		MeshResult result;
 		result.pos = job.pos;

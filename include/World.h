@@ -88,5 +88,5 @@ private:
 	ThreadSafeQueue<MeshResult> m_ResultQueue;
 
 	std::vector<std::thread> m_Workers;
-	std::atomic<bool> m_Stopping = false;
+	std::atomic<bool> m_Stopped = false;
 };
