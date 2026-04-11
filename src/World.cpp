@@ -198,14 +198,7 @@ void World::WorkerLoop()
 		auto job = std::move(*jobOpt);
 
 		Mesh mesh;
-		mesh.MeshFromChunk(
-			m_Texture.get(),
-			*job.center,
-			job.left.get(),
-			job.right.get(),
-			job.front.get(),
-			job.back.get()
-		);
+		mesh.MeshFromChunk(m_Texture.get(), *job.center, job.left.get(), job.right.get(), job.front.get(), job.back.get());
 
 		MeshResult result;
 		result.pos = job.pos;

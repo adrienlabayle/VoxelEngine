@@ -30,13 +30,13 @@ public:
     inline int GetXWorldPos() const { return m_XWordPos; }
     inline int GetZWorldPos() const { return m_ZWordPos; }
 
-    inline VertexArray* GetOpaqueVertexArray() const { return m_OpaqueVertexArray; }
-    inline VertexBuffer* GetOpaqueVertexBuffer() const { return m_OpaqueVertexBuffer; }
-    inline IndexBuffer* GetOpaqueIndexBuffer() const { return m_OpaqueIndexBuffer; }
+    inline VertexArray* GetOpaqueVertexArray() const { return m_OpaqueVertexArray.get(); }
+    inline VertexBuffer* GetOpaqueVertexBuffer() const { return m_OpaqueVertexBuffer.get(); }
+    inline IndexBuffer* GetOpaqueIndexBuffer() const { return m_OpaqueIndexBuffer.get(); }
 
-    inline VertexArray* GetTransparentVertexArray() const { return m_TransparentVertexArray; }
-    inline VertexBuffer* GetTransparentVertexBuffer() const { return m_TransparentVertexBuffer; }
-    inline IndexBuffer* GetTransparentIndexBuffer() const { return m_TransparentIndexBuffer; }
+    inline VertexArray* GetTransparentVertexArray() const { return m_TransparentVertexArray.get(); }
+    inline VertexBuffer* GetTransparentVertexBuffer() const { return m_TransparentVertexBuffer.get(); }
+    inline IndexBuffer* GetTransparentIndexBuffer() const { return m_TransparentIndexBuffer.get(); }
 
     void SetNeedRemesh(bool state);
     bool GetNeedRemesh() const;
@@ -47,13 +47,13 @@ private:
     unsigned short m_Blocks[m_XSize * m_YSize * m_ZSize] = { 0 }; // init with air
     int m_XWordPos, m_ZWordPos;
 
-    VertexArray* m_OpaqueVertexArray = nullptr;
-    VertexBuffer* m_OpaqueVertexBuffer = nullptr;
-    IndexBuffer* m_OpaqueIndexBuffer = nullptr;
+    std::unique_ptr<VertexArray> m_OpaqueVertexArray = nullptr;
+    std::unique_ptr<VertexBuffer> m_OpaqueVertexBuffer = nullptr;
+    std::unique_ptr<IndexBuffer> m_OpaqueIndexBuffer = nullptr;
 
-    VertexArray* m_TransparentVertexArray = nullptr;
-    VertexBuffer* m_TransparentVertexBuffer = nullptr;
-    IndexBuffer* m_TransparentIndexBuffer = nullptr;
+    std::unique_ptr<VertexArray> m_TransparentVertexArray = nullptr;
+    std::unique_ptr<VertexBuffer> m_TransparentVertexBuffer = nullptr;
+    std::unique_ptr<IndexBuffer> m_TransparentIndexBuffer = nullptr;
 
     bool m_Loaded = false;
     bool m_NeedRemesh = false;

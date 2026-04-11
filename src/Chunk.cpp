@@ -49,42 +49,25 @@ Chunk::Chunk(int XWorldPos, int ZWorldPos, World& World)
 
 Chunk::~Chunk()
 {
-	if (m_OpaqueIndexBuffer) delete m_OpaqueIndexBuffer;
-	if (m_OpaqueVertexBuffer) delete m_OpaqueVertexBuffer;
-	if (m_OpaqueVertexArray) delete m_OpaqueVertexArray;
 
-	if (m_TransparentIndexBuffer) delete m_TransparentIndexBuffer;
-	if (m_TransparentVertexBuffer) delete m_TransparentVertexBuffer;
-	if (m_TransparentVertexArray) delete m_TransparentVertexArray;
 }
 
 void Chunk::ApplyMesh(const std::vector<Vertex>& opaqueV, const std::vector<unsigned int>& opaqueI, const std::vector<Vertex>& transparentV, const std::vector<unsigned int>& transparentI)
 {
-	if (m_Loaded)
-	{
-		delete m_OpaqueVertexArray;
-		delete m_OpaqueVertexBuffer;
-		delete m_OpaqueIndexBuffer;
-
-		delete m_TransparentVertexArray;
-		delete m_TransparentVertexBuffer;
-		delete m_TransparentIndexBuffer;
-	}
-
 	VertexBufferLayout layout;
 	layout.PushVertex();
 
 	// Opaque
-	m_OpaqueVertexArray = new VertexArray();
-	m_OpaqueVertexBuffer = new VertexBuffer(opaqueV.data(), opaqueV.size() * sizeof(Vertex));
+	m_OpaqueVertexArray = std::make_unique<VertexArray>();
+	m_OpaqueVertexBuffer = std::make_unique<VertexBuffer>(opaqueV.data(), opaqueV.size() * sizeof(Vertex));
 	m_OpaqueVertexArray->AddBuffer(*m_OpaqueVertexBuffer, layout);
-	m_OpaqueIndexBuffer = new IndexBuffer(opaqueI.data(), opaqueI.size());
+	m_OpaqueIndexBuffer = std::make_unique<IndexBuffer>(opaqueI.data(), opaqueI.size());
 
 	// Transparent
-	m_TransparentVertexArray = new VertexArray();
-	m_TransparentVertexBuffer = new VertexBuffer(transparentV.data(), transparentV.size() * sizeof(Vertex));
+	m_TransparentVertexArray = std::make_unique<VertexArray>();
+	m_TransparentVertexBuffer = std::make_unique<VertexBuffer>(transparentV.data(), transparentV.size() * sizeof(Vertex));
 	m_TransparentVertexArray->AddBuffer(*m_TransparentVertexBuffer, layout);
-	m_TransparentIndexBuffer = new IndexBuffer(transparentI.data(), transparentI.size());
+	m_TransparentIndexBuffer = std::make_unique<IndexBuffer>(transparentI.data(), transparentI.size());
 
 	m_Loaded = true;
 }
