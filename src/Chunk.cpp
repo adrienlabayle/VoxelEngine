@@ -52,6 +52,40 @@ Chunk::~Chunk()
 
 }
 
+void Chunk::Generate(World& World)
+{
+	TerrainGenerator generator(m_XWordPos, m_ZWordPos, World.GetPerlinNoise());
+
+	for (int x = 0; x < m_XSize; x++)
+		for (int z = 0; z < m_ZSize; z++)
+		{
+			int globalX = x + m_XWordPos * m_XSize;
+			int globalZ = z + m_ZWordPos * m_ZSize;
+
+			// Height
+			float h = generator.GetHeight(globalX, globalZ);
+			int height = static_cast<int>(h * m_YSize + 70);
+
+			// Biome
+			BiomeProfile biome = generator.GetBiomeProfile(globalX, globalZ);
+
+			// Block fill
+			for (int y = height; y >= 0; --y)
+			{
+				int index = x + m_XSize * (y + m_YSize * z);
+
+				if (y == height)
+					m_Blocks[index] = biome.topBlock;
+
+				else if (y >= height - 5)
+					m_Blocks[index] = biome.layer1;
+
+				else
+					m_Blocks[index] = biome.layer2;
+			}
+		}
+}
+
 void Chunk::ApplyMesh(const std::vector<Vertex>& opaqueV, const std::vector<unsigned int>& opaqueI, const std::vector<Vertex>& transparentV, const std::vector<unsigned int>& transparentI)
 {
 	VertexBufferLayout layout;

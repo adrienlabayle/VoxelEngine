@@ -9,7 +9,7 @@
 #include "Chunk.h"
 #include "Mesh.h"
 #include "Atlas.h"
-#include "PerlinNoise.h"
+#include "TerrainGenerator.h"
 #include "Frustum.h"
 #include "ThreadSafeQueue.h"
 

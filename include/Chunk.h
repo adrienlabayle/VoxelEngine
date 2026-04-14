@@ -23,6 +23,7 @@ public:
     static const int m_YSize = 512;
     static const int m_ZSize = 16;
 
+    void Generate(World& World);
     void ApplyMesh(const std::vector<Vertex>& opaqueV, const std::vector<unsigned int>& opaqueI, const std::vector<Vertex>& transparentV, const std::vector<unsigned int>& transparentI);
 
     unsigned short GetBlockLocal(int x, int y, int z) const;

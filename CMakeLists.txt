@@ -22,6 +22,7 @@ add_executable(V0.11
     src/World.cpp
     src/PerlinNoise.cpp
     src/Frustum.cpp
+    src/TerrainGenerator.cpp
 
     vendor/stb_image/stb_image.cpp
     vendor/stb_image/stb_image.h
@@ -52,6 +53,7 @@ add_executable(V0.11
     include/Frustum.h
     include/ThreadSafeQueue.h
     include/ThreadSafeSet.h
+    include/TerrainGenerator.h
 )
 
 file(GLOB TESTS_SOURCES tests/*.cpp)
@@ -86,6 +88,7 @@ source_group(TREE ${CMAKE_SOURCE_DIR} FILES
     src/World.cpp
     src/PerlinNoise.cpp
     src/Frustum.cpp
+    src/TerrainGenerator.cpp
 
     vendor/stb_image/stb_image.cpp
     vendor/stb_image/stb_image.h
@@ -116,6 +119,7 @@ source_group(TREE ${CMAKE_SOURCE_DIR} FILES
     include/Frustum.h
     include/ThreadSafeQueue.h
     include/ThreadSafeSet.h
+    include/TerrainGenerator.h
 
     ${SHADER_FILES}
 )
