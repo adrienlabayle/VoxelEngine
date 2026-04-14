@@ -6,6 +6,7 @@
 Chunk::Chunk(int XWorldPos, int ZWorldPos, World& World)
 	: m_XWordPos(XWorldPos), m_ZWordPos(ZWorldPos)
 {
+	/*
 	for (int x = 0; x < m_XSize; x++)
 		for (int z = 0; z < m_ZSize; z++)
 		{
@@ -45,6 +46,9 @@ Chunk::Chunk(int XWorldPos, int ZWorldPos, World& World)
 					m_Blocks[x + m_XSize * (y + m_YSize * z)] = 3; // Stone
 			}
 		}
+		*/
+
+	Generate(World);
 }
 
 Chunk::~Chunk()
@@ -56,6 +60,8 @@ void Chunk::Generate(World& World)
 {
 	TerrainGenerator generator(m_XWordPos, m_ZWordPos, World.GetPerlinNoise());
 
+	generator.InitBiomes();
+
 	for (int x = 0; x < m_XSize; x++)
 		for (int z = 0; z < m_ZSize; z++)
 		{
@@ -65,6 +71,8 @@ void Chunk::Generate(World& World)
 			// Height
 			float h = generator.GetHeight(globalX, globalZ);
 			int height = static_cast<int>(h * m_YSize + 70);
+
+			height = std::clamp(height, 0, m_YSize - 1);	
 
 			// Biome
 			BiomeProfile biome = generator.GetBiomeProfile(globalX, globalZ);

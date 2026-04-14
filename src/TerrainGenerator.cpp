@@ -171,7 +171,7 @@ float TerrainGenerator::GetHeight(int x, int z)
 	float detail =
 		m_Noise.Perlin(x * m_DetailFreq, z * m_DetailFreq);
 
-	base = base * 0.8f + detail * 0.2f; // octave 1 + octave 2
+	base = base * 0.1f + detail * 0.05f; // octave 1 + octave 2
 
 	// Inter biome
 	float n = GetInterBiomeNoise(x, z);
@@ -218,10 +218,10 @@ BiomeProfile TerrainGenerator::GetBiomeProfile(int x, int z)
 	{
 		if (globalWeights[g] > 0.01f)
 		{
-			float GlobalBorderNoise = m_Noise.Perlin((x + 750 + g * 100) * 0.01f, (z + 750 + g * 100) * 0.01f);
+			float GlobalBorderNoise = m_Noise.Perlin((x + 750 + g * 100) * 0.5f, (z + 750 + g * 100) * 0.5f); // *0.5f = frequence
 			GlobalBorderNoise -= 0.5f; // centered noise
 
-			globalWeights[g] += GlobalBorderNoise * 0.1f; // low amplitude
+			globalWeights[g] += GlobalBorderNoise * 0.05f; // amplitude, so frequence and amplitude will define here the visual transition between txo global biome
 			globalWeights[g] = std::max(globalWeights[g], 0.0f);
 		}
 	}

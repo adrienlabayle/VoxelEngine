@@ -3,7 +3,7 @@
 Mesh::Mesh()
 {
     m_BlockTable[0].transparent = true;
-    m_BlockTable[5].transparent = true;
+    //m_BlockTable[5].transparent = true;
 }
 
 Mesh::~Mesh()

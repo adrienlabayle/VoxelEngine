@@ -27,7 +27,7 @@ namespace test {
         m_Shader = std::make_unique<Shader>("res/shaders/Basic.shader");
         m_Shader->Bind();
 
-        m_Texture = std::make_shared<Atlas>("res/textures/ATLAS.png", 3, 3);  // WATCHOUT it must follow the atlas structure !
+        m_Texture = std::make_shared<Atlas>("res/textures/ATLAS.png", 16, 16);  // WATCHOUT it must follow the atlas structure !
         m_Shader->SetUniform1i("u_Texture", 0);
 
         m_World = std::make_unique<World>(20, m_Texture, 1); //RenderDistance, Atlas, Seed
