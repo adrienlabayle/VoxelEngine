@@ -54,20 +54,23 @@ namespace Noise {
 
     // GRADIENT
     // Cette fonction génère un vecteur gradient pseudo-aléatoire
-    // et calcule le produit scalaire avec le vecteur distance
+    // et calcule le produit scalaire avec le vecteur distance, qui sera ici rien d'autre que (x, y)
     float PerlinNoise::Grad(int hash, float x, float y) const {
+        int h = hash & 7; // 8 directions pour notre gradient pseudo-aléatoire: (1, 1); (-1, 1); (1, -1); (-1, -1); (1, 0); (-1, 0); (0, 1) et (0, -1)
 
-        // On limite à 8 directions possibles (3 bits)
-        int h = hash & 7;
+        switch (h)
+        {
+        case 0: return  x + y; // <(1, 1), (x, y)> = x + y
+        case 1: return -x + y;
+        case 2: return  x - y;
+        case 3: return -x - y;
+        case 4: return  x;
+        case 5: return -x;
+        case 6: return  y;
+        case 7: return -y;
+        }
 
-        // Selon h, on choisit comment combiner x et y
-        // → permet d’éviter cos/sin (plus rapide)
-        float u = h < 4 ? x : y;
-        float v = h < 4 ? y : x;
-
-        // On change les signes selon les bits
-        // → simule des directions différentes
-        return ((h & 1) ? -u : u) + ((h & 2) ? -2.0f * v : 2.0f * v);
+        return 0.0f;
     }
 
 

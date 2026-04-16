@@ -31,7 +31,6 @@ namespace test {
         m_Shader->SetUniform1i("u_Texture", 0);
 
         m_World = std::make_unique<World>(20, m_Texture, 1); //RenderDistance, Atlas, Seed
-        //m_World->Load(glm::vec3(7.0f, 18.0f, 7.0f));
 
         int width, height;
         glfwGetWindowSize(window, &width, &height);

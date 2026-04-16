@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PerlinNoise.h"
+
 #include <cmath>
 #include <algorithm>
 
@@ -26,7 +27,8 @@ public:
 		const Noise::PerlinNoise& noise,
 		float baseFreq = 0.01f,
 		float detailFreq = 0.05f,
-		float biomeFreq = 0.005f,
+		float globalBiomeFreq = 0.0005f,
+		float interBiomeFreq = 0.003f,
 		float biomeSharpness = 5.0f,
 		float blendWidth = 100.0f
 	);
@@ -49,7 +51,8 @@ private:
 	// Config
 	float m_BaseFreq;
 	float m_DetailFreq;
-	float m_BiomeFreq;
+	float m_GlobalBiomeFreq;
+	float m_InterBiomeFreq;
 	float m_BiomeSharpness;
 	float m_GlobalBlendWidth;
 
@@ -57,11 +60,9 @@ private:
 	static BiomeProfile m_Biomes[4][4]; // [global][inter]
 
 	// Internal
-	int GetGlobalBiome(int x, int z);
+	float GetGlobalBiomeNoise(int x, int z);
 
 	float GetInterBiomeNoise(int x, int z);
 
-	void ComputeInterWeights(float n, float weights[4]);
-
-	void ComputeGlobalWeights(int x, int z, float weights[4]);
+	void ComputeWeights(float n, float weights[4]);
 };

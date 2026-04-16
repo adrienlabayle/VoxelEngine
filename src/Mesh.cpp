@@ -10,14 +10,9 @@ Mesh::~Mesh()
 {
 }
 
-unsigned short Mesh::GetBlockSafe(int x, int y, int z,
-    const Chunk& center,
-    const Chunk* left,
-    const Chunk* right,
-    const Chunk* front,
-    const Chunk* back) const
+unsigned short Mesh::GetBlockSafe(int x, int y, int z, const Chunk& center, const Chunk* left, const Chunk* right, const Chunk* front, const Chunk* back) const
 {
-    // 🔥 FIX CRITIQUE : bounds Y
+    // bounds Y
     if (y < 0 || y >= Chunk::m_YSize)
         return 0;
 
@@ -54,7 +49,7 @@ bool Mesh::IsFaceVisible(int x, int y, int z, int face,
     const Chunk* front,
     const Chunk* back) const
 {
-    // 🔧 micro-opt (évite glm)
+    // micro-opt (évite glm)
     static const int dx[6] = { 1,-1,0,0,0,0 };
     static const int dy[6] = { 0,0,1,-1,0,0 };
     static const int dz[6] = { 0,0,0,0,1,-1 };
@@ -66,7 +61,7 @@ bool Mesh::IsFaceVisible(int x, int y, int z, int face,
         center, left, right, front, back
     );
 
-    // 🔒 safety
+    // safety
     if (neighbor >= 256)
         return true;
 
