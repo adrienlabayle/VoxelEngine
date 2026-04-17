@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PerlinNoise.h"
+#include "VoronoiNoise.h"
 
 #include <cmath>
 #include <algorithm>
@@ -25,6 +26,7 @@ public:
 		int chunkX,
 		int chunkZ,
 		const Noise::PerlinNoise& noise,
+		const Noise::VoronoiNoise& voronoiNoise,
 		float baseFreq = 0.01f,
 		float detailFreq = 0.05f,
 		float globalBiomeFreq = 0.0005f,
@@ -47,6 +49,7 @@ private:
 	int m_ChunkZ;
 
 	const Noise::PerlinNoise& m_Noise;
+	const Noise::VoronoiNoise& m_VoronoiNoise;
 
 	// Config
 	float m_BaseFreq;

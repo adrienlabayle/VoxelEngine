@@ -36,7 +36,7 @@ namespace test {
         glfwGetWindowSize(window, &width, &height);
         m_Proj = glm::perspective(glm::radians(70.0f), (float)width / (float)height, 0.1f, 1000.0f);  // FOV,Width, Height, near, far
 
-        m_Camera = std::make_unique<Camera>(glm::vec3(7.0f, 140.0f, 7.0f));
+        m_Camera = std::make_unique<Camera>(glm::vec3(1000.0f, 140.0f, -800.0f));
 	}
 
 	TestCube3D::~TestCube3D()

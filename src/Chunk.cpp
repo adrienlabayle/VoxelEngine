@@ -58,7 +58,7 @@ Chunk::~Chunk()
 
 void Chunk::Generate(World& World)
 {
-	TerrainGenerator generator(m_XWordPos, m_ZWordPos, World.GetPerlinNoise());
+	TerrainGenerator generator(m_XWordPos, m_ZWordPos, World.GetPerlinNoise(), World.GetVoronoiNoise());
 
 	generator.InitBiomes();
 

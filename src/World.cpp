@@ -1,7 +1,7 @@
 #include "World.h"
 
 World::World(int RenderDistance, std::shared_ptr<Atlas> Atlas, unsigned int Seed)
-	: m_RenderDistance(RenderDistance), m_Texture(Atlas), m_PerlinNoise(Seed)
+	: m_RenderDistance(RenderDistance), m_Texture(Atlas), m_PerlinNoise(Seed), m_VoronoiNoise(Seed)
 {
     m_Renderer = std::make_unique<Renderer>();
 

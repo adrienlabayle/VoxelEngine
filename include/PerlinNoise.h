@@ -7,6 +7,7 @@
 #include <random>
 
 namespace Noise {
+
 	class PerlinNoise
 	{
 	public:

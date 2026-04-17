@@ -1,6 +1,7 @@
 #include "PerlinNoise.h"
 
 namespace Noise {
+
 	PerlinNoise::PerlinNoise(unsigned int Seed)
         : m_Seed(Seed)
 	{

@@ -71,6 +71,7 @@ public:
 	void WorkerLoop();
 
 	inline const Noise::PerlinNoise& GetPerlinNoise() const { return m_PerlinNoise; }
+	inline const Noise::VoronoiNoise& GetVoronoiNoise() const { return m_VoronoiNoise; }
 
 private:
 	std::unordered_map<ChunkPosition, std::shared_ptr<Chunk>, ChunkPositionHash> m_Chunks;
@@ -80,7 +81,10 @@ private:
 
 	int m_RenderDistance;
 	glm::vec2 m_LastCamChunkPos = { INT_MAX, INT_MAX };
+
 	Noise::PerlinNoise m_PerlinNoise;
+	Noise::VoronoiNoise m_VoronoiNoise;
+
 	std::vector<std::shared_ptr<Chunk>> m_OrderedChunks;
 	int m_MaxRemeshPerFrame = 2; // 2 chunks per frame max
 
