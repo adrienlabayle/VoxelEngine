@@ -2,179 +2,165 @@
 
 ## Overview
 
-This is a C++ voxel engine (Minecraft-like) developed as a personal project to learn real-time rendering, engine architecture, and low-level performance optimization.
+This is a C++ voxel engine (Minecraft-like) developed as a personal project to explore:
 
-The project is written in modern C++ with OpenGL as the rendering API. It includes ImGui for debugging and development tools.
+- real-time rendering
+- procedural generation
+- engine architecture
+- performance optimization (CPU & GPU)
 
-It is an ongoing long-term project aimed at exploring game engine design, procedural generation, and GPU/CPU optimization techniques.
+The project uses modern C++ with OpenGL and includes ImGui for debugging tools.
+
+---
+
+## Showcase
+
+![Voxel Engine Biomes](./screenshots/snow_transition.png)
+
+> Voronoi-based biome system with smooth transitions and adaptive terrain generation
 
 ---
 
 ## Background
 
-This project started after following The Cherno OpenGL series:
+This project started after following The Cherno OpenGL series:  
 https://www.youtube.com/watch?v=W3gAzLwfIP0&list=PLlrATfBNZ98foTJPJ_Ev03o2oq3-GGOS2
 
-It initially began as a learning project for modern OpenGL, but progressively evolved into a full voxel engine with:
+It evolved from a learning project into a fully custom voxel engine featuring:
 
-- custom chunk system
+- chunk streaming
 - multithreaded mesh generation
-- procedural terrain generation
-- GPU performance optimization experiments
+- procedural terrain & biome systems
+- performance-focused architecture
 
 ---
 
 ## Tech Stack
 
-- C++ (modern C++17/20)
+- C++ (C++17/20)
 - OpenGL
 - GLSL shaders
-- ImGui (debug UI)
-- GLM (math)
+- ImGui
+- GLM
 
 ---
 
 ## Features
 
 ### World System
-- Chunk-based world streaming around player
-- Dynamic chunk loading/unloading based on render distance
-- CPU voxel storage per chunk
+- Chunk-based world streaming
+- Dynamic loading/unloading around player
+- Seamless chunk borders
 
 ### Rendering
 - Separate pipelines:
   - opaque geometry
   - transparent geometry
-- Texture atlas system
+- Texture atlas
 - Frustum culling
 
 ### Voxel System
-- Full 3D voxel grid per chunk
-- Face culling (only visible faces are generated)
-- Neighbor-aware sampling for seamless chunk borders
+- Full 3D voxel grid
+- Face culling (only visible faces generated)
+- Neighbor-aware meshing
 
 ### Multithreading
 - Worker thread pool for chunk meshing
-- Thread-safe job / result queues
-- Asynchronous mesh generation pipeline
+- Thread-safe job system
+- Asynchronous mesh generation
 
-### Procedural Generation
-- Perlin noise terrain generation
-- Early biome experimentation (in progress)
+---
+
+## Procedural Generation
+
+### Terrain
+- Perlin noise-based heightmap
+- Tuned frequencies & amplitudes for natural terrain
+
+### Biomes (NEW)
+- Voronoi-based biome distribution
+- Smooth blending between up to 4 biomes
+- Removal of Perlin "value continuity" limitation
+- More natural large-scale biome regions
+
+### Biome Blending
+- Multi-biome weight system
+- Noise-based border perturbation for organic transitions
 
 ---
 
 ## Architecture
 
-### Main thread
-- Chunk creation / deletion based on camera position
-- Rendering (OpenGL draw calls)
-- Applies generated meshes to GPU buffers
+### Main Thread
+- Chunk management (load/unload)
+- Rendering (OpenGL)
+- GPU buffer updates
 
-### Worker threads
-- Generate chunk meshes asynchronously
-- Convert voxel data into vertex/index buffers
+### Worker Threads
+- Chunk mesh generation
+- Voxel → mesh conversion
 
-### Chunk rendering
+### Chunk Rendering
 Each chunk contains:
 - CPU voxel data
 - GPU buffers:
-  - VAO / VBO / IBO for opaque geometry
-  - VAO / VBO / IBO for transparent geometry
+  - opaque mesh
+  - transparent mesh
 
-This results in:
-- 2 draw calls per chunk
-
----
-
-## Progression
-
-- **v0.11 → First Git-tracked version of the engine**
-  - Initial voxel world implementation
-  - Chunk system with streaming around player
-  - Face culling (only visible faces generated)
-  - Separate opaque / transparent rendering pipeline
-  - Texture atlas integration
-  - Frustum culling (significant reduction of rendered chunks)
-  - Mesh generation throttling per frame (stability improvement)
-  - Multithreaded mesh generation system
-  - Thread-safe job/result queues
-  - Performance improvement: ~20 FPS → ~70–90 FPS stable
-
-> FPS measurements are done with a render distance of 20 chunks  
-> (world area ≈ (1 + 20×2)² chunks around the player)
+→ ~2 draw calls per chunk
 
 ---
 
-## Performance Notes
+## Performance
 
-### Before optimizations
-- ~20 FPS during chunk updates (severe CPU spikes)
+### Current
+- ~70–90 FPS stable
+- ~80 FPS in heavy biome transitions
 
-### After frustum culling
-- ~40 FPS (reduced rendered workload)
+### Previous
+- ~20 FPS (before optimizations)
 
-### After multithreading
-- ~70–90 FPS stable depending on scene
+### Improvements
+- Frustum culling
+- Multithreaded meshing
+- Controlled mesh generation per frame
 
 ---
 
 ## Current Bottlenecks
 
-The CPU is no longer the main limitation.
+GPU-bound:
 
-Current bottleneck is GPU-side:
-
-- high vertex density per chunk
-- large number of draw calls (per-chunk rendering)
+- high vertex count per chunk
+- many draw calls
 - no LOD system
-- limited GPU batching/instancing
 
 ---
 
-## Previous CPU bottlenecks (now solved)
+## Limitations
 
-- Chunk generation spikes when moving fast
-- Mesh rebuild stuttering
-- Heavy synchronous mesh building
-
-Solved via:
-- worker thread pool
-- job queue system
-- per-frame remeshing limits
-
----
-
-## Current Limitations
-
-- No lighting system yet (sunlight / torchlight)
-- No LOD system
-- Greedy meshing tested but not retained (complexity vs gain not worth it in current pipeline)
-- Basic procedural generation
-- GPU data layout still not optimized
+- No lighting system yet
+- No LOD
+- Greedy meshing not retained (cost > benefit)
+- GPU optimization still in progress
 
 ---
 
 ## Future Work
 
-- Biome system (plains / desert / snow with smooth transitions)
 - Vegetation system (trees, foliage)
-- Lighting system (block light + sunlight propagation)
-- Level of Detail (LOD system for chunks)
-- GPU optimization:
-  - reduced vertex density
-  - potential vertex pulling / GPU-driven rendering
-- Improved procedural generation (multi-noise terrain system)
+- Lighting (sun + block light)
+- LOD system
+- GPU optimizations (instancing / vertex pulling)
+- Procedural trees (seed-based generation)
+- Advanced biome system
 
 ---
 
 ## Design Notes
 
-- Greedy meshing (including binary variants) was experimented with but did not provide sufficient benefit due to:
-  - increased complexity
-  - interaction with future lighting systems
-  - GPU-side bottlenecks dominating performance
-
-- Frustum culling provided a strong performance improvement with minimal architectural cost
-
-- Current development focus has shifted from CPU optimization → GPU workload reduction
+- Perlin noise is used for terrain (continuous, smooth)
+- Voronoi noise is used for biome partitioning (discrete regions)
+- Engine focus has shifted:
+  
+> CPU optimization → GPU optimization

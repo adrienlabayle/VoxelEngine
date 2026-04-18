@@ -1,6 +1,5 @@
 #pragma once
 
-#include <vector>      // std::vector
 #include <algorithm>   // std::sort
 #include <cmath>       // std::floor, std::sqrt
 #include <cfloat>      // FLT_MAX

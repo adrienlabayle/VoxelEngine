@@ -12,7 +12,7 @@ namespace Noise {
 
     int VoronoiNoise::Hash(int x, int z) const
     {
-        int h = x * 374761393 + z * 668265263; // grands nombres premiers
+        int h = x * 374761393 + z * 668265263 + m_Seed * 1442695040888963407ULL; // grands nombres premiers
         h = (h ^ (h >> 13)) * 1274126177;
         return h ^ (h >> 16);
     }
@@ -41,7 +41,8 @@ namespace Noise {
         int cellX = (int)std::floor(x);
         int cellZ = (int)std::floor(z);
 
-        std::vector<Candidate> candidates;
+        Candidate candidates[9];
+        int index = 0;
 
         // On check une zone 3x3 (souvent suffisant)
         for (int dz = -1; dz <= 1; dz++)
@@ -60,7 +61,7 @@ namespace Noise {
                 int h = Hash(cx, cz);
                 int biome = h & 3; // 4 biomes
 
-                candidates.push_back({ dist, biome });
+                candidates[index++] = { dist, biome };
             }
         }
 
@@ -90,7 +91,9 @@ namespace Noise {
         {
             if (bestDist[i] < FLT_MAX)
             {
-                weights[i] = 1.0f / std::pow(bestDist[i] + 0.0001f, 1.5f);
+                float d = bestDist[i] + 0.0001f;
+                weights[i] = 1.0f / (d * std::sqrt(d));
+
                 sum += weights[i];
             }
         }

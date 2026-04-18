@@ -112,17 +112,11 @@ float TerrainGenerator::GetHeight(int x, int z)
 	base *= 0.5f;
 
 	// Inter biome noise and weights
-	//float interNoise = GetInterBiomeNoise(x, z);
-
 	float interWeights[4];
-	//ComputeWeights(interNoise, interWeights);
 	m_VoronoiNoise.GetBiomes(x * m_InterBiomeFreq, z * m_InterBiomeFreq, interWeights);
 
 	// Global biome noise and weights
-	//float globalNoise = GetGlobalBiomeNoise(x, z);
-
 	float globalWeights[4];
-	//ComputeWeights(globalNoise, globalWeights);
 	m_VoronoiNoise.GetBiomes(x * m_GlobalBiomeFreq, z * m_GlobalBiomeFreq, globalWeights);
 
 	float height = 0.0f;
@@ -148,41 +142,71 @@ float TerrainGenerator::GetHeight(int x, int z)
 BiomeProfile TerrainGenerator::GetBiomeProfile(int x, int z)
 {
 	// Inter biome noise and weights
-	//float interNoise = GetInterBiomeNoise(x, z);
-
 	float interWeights[4];
-	//ComputeWeights(interNoise, interWeights);
 	m_VoronoiNoise.GetBiomes(x * m_InterBiomeFreq, z * m_InterBiomeFreq, interWeights);
 
 	// Global biome noise and weights
-	//float globalNoise = GetGlobalBiomeNoise(x, z);
-
 	float globalWeights[4];
-	//ComputeWeights(globalNoise, globalWeights);
 	m_VoronoiNoise.GetBiomes(x * m_GlobalBiomeFreq, z * m_GlobalBiomeFreq, globalWeights);
 	
 	// ADD the block mixt effect in the borders between two global biomes
-	// Add small noise ONLY to the two non-zero weights
-	for (int g = 0; g < 4; g++)
-	{
-		if (globalWeights[g] > 0.01f)
-		{
-			float GlobalBorderNoise = m_Noise.Perlin((x + 750 + g * 100) * 0.1f, (z + 750 + g * 100) * 0.1f); // *0.5f = frequence
-			GlobalBorderNoise -= 0.5f; // centered noise
+	float maxGlobal = std::max({ globalWeights[0], globalWeights[1], globalWeights[2], globalWeights[3] });
+	float maxInter = std::max({ interWeights[0],  interWeights[1],  interWeights[2],  interWeights[3] });
 
-			globalWeights[g] += GlobalBorderNoise * 0.05f; // amplitude, so frequence and amplitude will define here the visual transition between txo global biome
-			globalWeights[g] = std::max(globalWeights[g], 0.0f);
-		}
-	}
-	
-	// Normalisation
-	float sum = 0.0f;
-	for (int g = 0; g < 4; g++) sum += globalWeights[g];
-
-	if (sum > 0.0f)
+	// Apply global border noise
+	if (maxGlobal < 0.8f)
 	{
 		for (int g = 0; g < 4; g++)
-			globalWeights[g] /= sum;
+		{
+			if (globalWeights[g] > 0.01f)
+			{
+				float GlobalBorderNoise = m_Noise.Perlin((x + 750 + g * 100) * 0.1f, (z + 750 + g * 100) * 0.1f); // *0.1f = frequence
+				GlobalBorderNoise -= 0.5f; // centered noise
+
+				globalWeights[g] += GlobalBorderNoise * 0.05f; // amplitude, so frequence and amplitude will define here the visual transition between txo global biome
+				globalWeights[g] = std::max(globalWeights[g], 0.0f);
+			}
+		}
+		// Normalisation
+		float globalBiomeSum = 0.0f;
+		for (int g = 0; g < 4; g++)
+		{
+			globalBiomeSum += globalWeights[g];
+		}
+
+		if (globalBiomeSum)
+		{
+			for (int g = 0; g < 4; g++)
+				globalWeights[g] /= globalBiomeSum;
+		}
+	}
+
+	// Apply inter border noise
+	if (maxInter < 0.8f)
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			if (interWeights[i] > 0.01f)
+			{
+				float InterBorderNoise = m_Noise.Perlin((x + 750 + i * 100) * 0.15f, (z + 750 + i * 100) * 0.15f); // *0.15f = frequence
+				InterBorderNoise -= 0.5f; // centered noise
+
+				interWeights[i] += InterBorderNoise * 0.4f; //amplitude
+				interWeights[i] = std::max(interWeights[i], 0.0f);
+			}
+		}
+		// Normalisation
+		float interBiomeSum = 0.0f;
+		for (int i = 0; i < 4; i++)
+		{
+			interBiomeSum += interWeights[i];
+		}
+
+		if (interBiomeSum)
+		{
+			for (int i = 0; i < 4; i++)
+				interWeights[i] /= interBiomeSum;
+		}
 	}
 
 	// Find dominant global biome
