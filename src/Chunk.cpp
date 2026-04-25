@@ -6,48 +6,6 @@
 Chunk::Chunk(int XWorldPos, int ZWorldPos, World& World)
 	: m_XWordPos(XWorldPos), m_ZWordPos(ZWorldPos)
 {
-	/*
-	for (int x = 0; x < m_XSize; x++)
-		for (int z = 0; z < m_ZSize; z++)
-		{
-			int globalX = x + m_XWordPos * m_XSize;
-			int globalZ = z + m_ZWordPos * m_ZSize;
-
-			float baseFreq = 1.0f / 64.0f;
-			float biomeFreq = 1.0f / 128.0f;
-			float canyonFreq = 1.0f / 32.0f;
-
-			float amplitude = 0.07f;
-
-			float base = World.GetPerlinNoise().Perlin(globalX * baseFreq, globalZ * baseFreq);
-			float biome = World.GetPerlinNoise().Perlin(globalX * biomeFreq + 750, globalZ * biomeFreq + 750);
-			float canyon = World.GetPerlinNoise().Perlin(globalX * canyonFreq + 1500, globalZ * canyonFreq + 1500);
-
-			// montagnes
-			float mountain = pow(base, 2.0f);
-
-			// canyon
-			float canyonShape = std::abs(canyon - 0.5f) * 2.0f;
-
-			// mélange
-			float biomeFactor = std::clamp((biome - 0.5f) * 2.0f, 0.0f, 1.0f);
-			base = base * (1.0f - biomeFactor) + mountain * biomeFactor;
-			base -= canyonShape * 0.3f;
-
-			base = std::clamp(base, 0.0f, 1.0f);
-			int h = static_cast<int>(base * amplitude * m_YSize + 70);  //static_cast<type>(...) <=> moderne de (type)(...)
-
-			for (int y = h; y >= 0; --y) {
-				if (y == h)
-					m_Blocks[x + m_XSize * (y + m_YSize * z)] = 1; // Grass
-				else if (y >= std::max(h - 5, 0))
-					m_Blocks[x + m_XSize * (y + m_YSize * z)] = 2; // Dirt
-				else
-					m_Blocks[x + m_XSize * (y + m_YSize * z)] = 3; // Stone
-			}
-		}
-		*/
-
 	Generate(World);
 }
 
@@ -72,7 +30,9 @@ void Chunk::Generate(World& World)
 			float h = generator.GetHeight(globalX, globalZ);
 			int height = static_cast<int>(h * m_YSize + 70);
 
-			height = std::clamp(height, 0, m_YSize - 1);	
+			height = std::clamp(height, 0, m_YSize - 1);
+
+			m_HeightTable[x * m_ZSize + z] = height;
 
 			// Biome
 			BiomeProfile biome = generator.GetBiomeProfile(globalX, globalZ);
@@ -92,6 +52,29 @@ void Chunk::Generate(World& World)
 					m_Blocks[index] = biome.layer2;
 			}
 		}
+
+	TreeGenerator treeGenerator(World.GetSeed());
+
+	treeGenerator.GenerateChunkTrees(*this, World);
+
+	ApplyGeneration(treeGenerator.GetBlocks());
+}
+
+void Chunk::ApplyGeneration(const unsigned short* blocks)
+{
+	/*
+	for (int x = 0; x < m_XSize; x++)
+		for (int z = 0; z < m_ZSize; z++)
+			for (int y = GetHeight(x, z); y < m_YSize; y++)  // We start checking y from the height of the terrain, because there is no tree bellow this level
+				m_Blocks[x + m_XSize * (y + m_YSize * z)] = blocks[x + m_XSize * (y + m_YSize * z)];
+	*/
+	int size = m_XSize * m_YSize * m_ZSize;
+
+	for (int i = 0; i < size; i++)
+	{
+		if (blocks[i] != 0)
+			m_Blocks[i] = blocks[i];
+	}
 }
 
 void Chunk::ApplyMesh(const std::vector<Vertex>& opaqueV, const std::vector<unsigned int>& opaqueI, const std::vector<Vertex>& transparentV, const std::vector<unsigned int>& transparentI)
@@ -124,6 +107,21 @@ unsigned short Chunk::GetBlockLocal(int x, int y, int z) const
 	}
 
 	return 0; // air
+}
+
+int Chunk::GetHeight(int x, int z) const
+{
+	return m_HeightTable[x * m_ZSize + z];
+}
+
+void Chunk::SetNeedGeneration(bool state)
+{
+	m_NeedGeneration = state;
+}
+
+bool Chunk::GetNeedGeneration() const
+{
+	return m_NeedGeneration;
 }
 
 void Chunk::SetNeedRemesh(bool state)

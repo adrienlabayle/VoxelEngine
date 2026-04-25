@@ -24,6 +24,7 @@ add_executable(V0.11
     src/Frustum.cpp
     src/TerrainGenerator.cpp
     src/VoronoiNoise.cpp
+    src/TreeGenerator.cpp
 
     vendor/stb_image/stb_image.cpp
     vendor/stb_image/stb_image.h
@@ -56,6 +57,7 @@ add_executable(V0.11
     include/ThreadSafeSet.h
     include/TerrainGenerator.h
     include/VoronoiNoise.h
+    include/TreeGenerator.h
 )
 
 file(GLOB TESTS_SOURCES tests/*.cpp)
@@ -92,6 +94,7 @@ source_group(TREE ${CMAKE_SOURCE_DIR} FILES
     src/Frustum.cpp
     src/TerrainGenerator.cpp
     src/VoronoiNoise.cpp
+    src/TreeGenerator.cpp
 
     vendor/stb_image/stb_image.cpp
     vendor/stb_image/stb_image.h
@@ -124,6 +127,7 @@ source_group(TREE ${CMAKE_SOURCE_DIR} FILES
     include/ThreadSafeSet.h
     include/TerrainGenerator.h
     include/VoronoiNoise.h
+    include/TreeGenerator.h
 
     ${SHADER_FILES}
 )

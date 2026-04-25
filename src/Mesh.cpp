@@ -3,7 +3,7 @@
 Mesh::Mesh()
 {
     m_BlockTable[0].transparent = true;
-    //m_BlockTable[5].transparent = true;
+    //m_BlockTable[12].transparent = true;
 }
 
 Mesh::~Mesh()
@@ -148,12 +148,7 @@ void Mesh::AddFaceVerticesAndIndices(const Chunk& chunk,
     }
 }
 
-void Mesh::MeshFromChunk(const Atlas* Atlas,
-    const Chunk& center,
-    const Chunk* left,
-    const Chunk* right,
-    const Chunk* front,
-    const Chunk* back)
+void Mesh::MeshFromChunk(const Atlas* Atlas, const Chunk& center, const Chunk* left, const Chunk* right, const Chunk* front, const Chunk* back)
 {
     m_OpaqueVertices.clear();
     m_OpaqueIndices.clear();

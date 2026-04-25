@@ -3,6 +3,7 @@
 #include "Renderer.h"
 
 #include <random>
+#include <cstring>
 
 #include "VertexArray.h"
 #include "VertexBuffer.h"
@@ -24,9 +25,11 @@ public:
     static const int m_ZSize = 16;
 
     void Generate(World& World);
+    void ApplyGeneration(const unsigned short* blocks);
     void ApplyMesh(const std::vector<Vertex>& opaqueV, const std::vector<unsigned int>& opaqueI, const std::vector<Vertex>& transparentV, const std::vector<unsigned int>& transparentI);
 
     unsigned short GetBlockLocal(int x, int y, int z) const;
+    int GetHeight(int x, int z) const;
 
     inline int GetXWorldPos() const { return m_XWordPos; }
     inline int GetZWorldPos() const { return m_ZWordPos; }
@@ -38,6 +41,9 @@ public:
     inline VertexArray* GetTransparentVertexArray() const { return m_TransparentVertexArray.get(); }
     inline VertexBuffer* GetTransparentVertexBuffer() const { return m_TransparentVertexBuffer.get(); }
     inline IndexBuffer* GetTransparentIndexBuffer() const { return m_TransparentIndexBuffer.get(); }
+
+    void SetNeedGeneration(bool state);
+    bool GetNeedGeneration() const;
 
     void SetNeedRemesh(bool state);
     bool GetNeedRemesh() const;
@@ -57,5 +63,8 @@ private:
     std::unique_ptr<IndexBuffer> m_TransparentIndexBuffer = nullptr;
 
     bool m_Loaded = false;
+    bool m_NeedGeneration = false;
     bool m_NeedRemesh = false;
+
+    int m_HeightTable[m_XSize * m_ZSize] = { 0 };
 };

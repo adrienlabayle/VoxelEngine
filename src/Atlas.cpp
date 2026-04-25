@@ -109,6 +109,23 @@ glm::vec2 Atlas::GetUVCoords(const glm::vec2& baseUV, unsigned short blockID, in
             TexIndex = 2;
             break;
         }
+        break;
+
+    case 11: //Tree
+        switch (face)
+        {
+        case 0: case 1: case 4: case 5: // +X, -X, +Z, -Z (side)
+            TexIndex = 17;
+            break;
+        case 2: case 3: // +Y, -Y (top and bottom)
+            TexIndex = 16;
+            break;
+        }
+        break;
+
+    case 12: //Leaves
+        TexIndex = 18;
+        break;
     }
     float TileWidth = 1.0f / m_AtlasWidth;
     float TileHeight = 1.0f / m_AtlasHeight;

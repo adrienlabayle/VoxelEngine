@@ -1,7 +1,7 @@
 #include "World.h"
 
 World::World(int RenderDistance, std::shared_ptr<Atlas> Atlas, unsigned int Seed)
-	: m_RenderDistance(RenderDistance), m_Texture(Atlas), m_PerlinNoise(Seed), m_VoronoiNoise(Seed)
+	: m_RenderDistance(RenderDistance), m_Texture(Atlas), m_PerlinNoise(Seed), m_VoronoiNoise(Seed), m_Seed(Seed)
 {
     m_Renderer = std::make_unique<Renderer>();
 
@@ -19,7 +19,7 @@ World::~World()
 {
 	m_Stopped = true;
 
-	m_JobQueue.Stop();     // Wake up workers
+	m_MeshQueue.Stop();     // Wake up workers
 	m_ResultQueue.Stop();
 
 	for (auto& t : m_Workers)
@@ -101,7 +101,7 @@ void World::Load(const glm::vec3& CameraChunkPosition)
 			job.front = get(pos.x, pos.z + 1);
 			job.back = get(pos.x, pos.z - 1);
 
-			m_JobQueue.Push(std::move(job));
+			m_MeshQueue.Push(std::move(job));
 
 			chunk->SetNeedRemesh(false);
 			jobCount++;
@@ -121,12 +121,7 @@ void World::Draw(const glm::vec3& CameraChunkPosition, const Shader* Shader, con
 
 		auto& chunk = it->second;
 
-		chunk->ApplyMesh(
-			result->opaqueVertices,
-			result->opaqueIndices,
-			result->transparentVertices,
-			result->transparentIndices
-		);
+		chunk->ApplyMesh( result->opaqueVertices, result->opaqueIndices, result->transparentVertices, result->transparentIndices);
 	}
 
 	Frustum frustum(Proj, View);
@@ -189,9 +184,9 @@ void World::WorkerLoop()
 {
 	while (true)
 	{
-		auto jobOpt = m_JobQueue.Pop(); // BLOQUANT
-
-		// sécurité shutdown (si queue stop)
+		auto jobOpt = m_MeshQueue.Pop(); // BLOQUANT
+		
+		// securite shutdown (si queue stop)
 		if (!jobOpt)
 			break;
 
@@ -209,4 +204,23 @@ void World::WorkerLoop()
 
 		m_ResultQueue.Push(std::move(result));
 	}
+}
+
+int World::GetHeight(int x, int z) const
+{
+	int XChunkPos = (int)std::floor(x / (float)Chunk::m_XSize);
+	int ZChunkPos = (int)std::floor(z / (float)Chunk::m_ZSize);
+
+	ChunkPosition pos = { XChunkPos, ZChunkPos };
+
+	if (m_Chunks.find(pos) != m_Chunks.end())
+	{
+		int localX = (x % Chunk::m_XSize + Chunk::m_XSize) % Chunk::m_XSize;
+		int localZ = (z % Chunk::m_ZSize + Chunk::m_ZSize) % Chunk::m_ZSize;
+
+		auto& chunk = m_Chunks.at(pos);
+
+		return chunk->GetHeight(localX, localZ);
+	}
+	return -1;
 }

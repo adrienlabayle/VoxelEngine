@@ -10,6 +10,7 @@
 #include "Mesh.h"
 #include "Atlas.h"
 #include "TerrainGenerator.h"
+#include "TreeGenerator.h"
 #include "Frustum.h"
 #include "ThreadSafeQueue.h"
 
@@ -36,6 +37,18 @@ struct ChunkPositionHash
 
 		return h1 ^ (h2 << 1); // shift + xor
 	}
+};
+
+struct GenerateJob
+{
+	ChunkPosition pos;
+};
+
+struct GenerateResult
+{
+	ChunkPosition pos;
+
+	unsigned short m_Blocks[Chunk::m_XSize * Chunk::m_YSize * Chunk::m_ZSize] = { 0 };
 };
 
 struct MeshJob
@@ -70,6 +83,10 @@ public:
 	void Draw(const glm::vec3& CameraChunkPosition, const Shader* Shader, const glm::mat4& View, const glm::mat4& Proj);
 	void WorkerLoop();
 
+	int GetHeight(int x, int z) const;
+
+	inline const unsigned int GetSeed() const { return m_Seed; }
+
 	inline const Noise::PerlinNoise& GetPerlinNoise() const { return m_PerlinNoise; }
 	inline const Noise::VoronoiNoise& GetVoronoiNoise() const { return m_VoronoiNoise; }
 
@@ -80,6 +97,8 @@ private:
 	std::shared_ptr<Atlas> m_Texture;
 
 	int m_RenderDistance;
+	unsigned int m_Seed;
+
 	glm::vec2 m_LastCamChunkPos = { INT_MAX, INT_MAX };
 
 	Noise::PerlinNoise m_PerlinNoise;
@@ -88,7 +107,8 @@ private:
 	std::vector<std::shared_ptr<Chunk>> m_OrderedChunks;
 	int m_MaxRemeshPerFrame = 2; // 2 chunks per frame max
 
-	ThreadSafeQueue<MeshJob> m_JobQueue;
+	ThreadSafeQueue<GenerateJob> m_GenerateQueue;
+	ThreadSafeQueue<MeshJob> m_MeshQueue;
 	ThreadSafeQueue<MeshResult> m_ResultQueue;
 
 	std::vector<std::thread> m_Workers;
