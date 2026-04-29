@@ -29,28 +29,28 @@ BiomeProfile TerrainGenerator::m_Biomes[4][4]; // Static biome table
 void TerrainGenerator::InitBiomes()
 {
 	// GLOBAL 0 (plains / forest)
-	m_Biomes[0][0] = { Plains,     1, 2, 3, true };
-	m_Biomes[0][1] = { Hills,      9, 2, 3, true };
-	m_Biomes[0][2] = { Hills,      9, 2, 3, true };
-	m_Biomes[0][3] = { Mountains,  10, 3, 3, false };
+	m_Biomes[0][0] = { Plains,     1, 2, 3, 5 };
+	m_Biomes[0][1] = { Hills,      9, 2, 3, 1 };
+	m_Biomes[0][2] = { Hills,      9, 2, 3, 1 };
+	m_Biomes[0][3] = { Mountains,  10, 3, 3, 0 };
 
 	// GLOBAL 1 (desert)
-	m_Biomes[1][0] = { Flat,       4, 4, 3, false };
-	m_Biomes[1][1] = { Plains,     4, 4, 3, false };
-	m_Biomes[1][2] = { Hills,      7, 4, 3, false };
-	m_Biomes[1][3] = { Mountains,  8, 3, 3, false };
+	m_Biomes[1][0] = { Flat,       4, 4, 3, 1 };
+	m_Biomes[1][1] = { Plains,     4, 4, 3, 1 };
+	m_Biomes[1][2] = { Hills,      7, 4, 3, 0 };
+	m_Biomes[1][3] = { Mountains,  8, 3, 3, 0 };
 
 	// GLOBAL 2 (snow)
-	m_Biomes[2][0] = { Plains,     6, 2, 3, false };
-	m_Biomes[2][1] = { Hills,      5, 2, 3, false };
-	m_Biomes[2][2] = { Mountains,  9, 3, 3, false };
-	m_Biomes[2][3] = { Mountains,  10, 3, 3, false };
+	m_Biomes[2][0] = { Plains,     6, 2, 3, 0 };
+	m_Biomes[2][1] = { Hills,      5, 2, 3, 0 };
+	m_Biomes[2][2] = { Mountains,  9, 3, 3, 0 };
+	m_Biomes[2][3] = { Mountains,  10, 3, 3, 0 };
 
 	// GLOBAL 3 (mountain region)
-	m_Biomes[3][0] = { Plains,     3, 2, 3, true };
-	m_Biomes[3][1] = { Hills,      3, 2, 3, true };
-	m_Biomes[3][2] = { Mountains,  3, 3, 3, false };
-	m_Biomes[3][3] = { Mountains,  3, 3, 3, false };
+	m_Biomes[3][0] = { Plains,     3, 2, 3, 0 };
+	m_Biomes[3][1] = { Hills,      3, 2, 3, 0 };
+	m_Biomes[3][2] = { Mountains,  3, 3, 3, 0 };
+	m_Biomes[3][3] = { Mountains,  3, 3, 3, 0 };
 }
 
 TerrainGenerator::TerrainGenerator(int chunkX, int chunkZ,const Noise::PerlinNoise& noise, const Noise::VoronoiNoise& voronoiNoise, float baseFreq, float detailFreq, float globalBiomeFreq, float interBiomeFreq, float biomeSharpness, float blendWidth)

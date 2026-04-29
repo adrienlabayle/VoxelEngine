@@ -14,7 +14,7 @@ struct BiomeProfile
 	int layer1;
 	int layer2;
 
-	bool hasTrees;
+	int treeLevel = 0;
 };
 
 class TerrainGenerator

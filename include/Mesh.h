@@ -12,6 +12,7 @@
 struct BlockInfo
 {
 	bool transparent = false;
+	bool blended = false;
 };
 
 class Mesh

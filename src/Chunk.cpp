@@ -32,7 +32,7 @@ void Chunk::Generate(World& World)
 
 			height = std::clamp(height, 0, m_YSize - 1);
 
-			m_HeightTable[x * m_ZSize + z] = height;
+			m_HeightTable[x + m_XSize * z] = height;
 
 			// Biome
 			BiomeProfile biome = generator.GetBiomeProfile(globalX, globalZ);
@@ -52,6 +52,8 @@ void Chunk::Generate(World& World)
 					m_Blocks[index] = biome.layer2;
 			}
 		}
+	// We take the tree level of the chunks central block as the global tree level of the chunk 
+	SetTreeLevel(generator.GetBiomeProfile(8 + m_XWordPos * m_XSize, 8 + m_ZWordPos * m_ZSize).treeLevel); 
 
 	TreeGenerator treeGenerator(World.GetSeed());
 
@@ -60,14 +62,8 @@ void Chunk::Generate(World& World)
 	ApplyGeneration(treeGenerator.GetBlocks());
 }
 
-void Chunk::ApplyGeneration(const unsigned short* blocks)
+void Chunk::ApplyGeneration(const unsigned short* blocks) // can potentially be optimized
 {
-	/*
-	for (int x = 0; x < m_XSize; x++)
-		for (int z = 0; z < m_ZSize; z++)
-			for (int y = GetHeight(x, z); y < m_YSize; y++)  // We start checking y from the height of the terrain, because there is no tree bellow this level
-				m_Blocks[x + m_XSize * (y + m_YSize * z)] = blocks[x + m_XSize * (y + m_YSize * z)];
-	*/
 	int size = m_XSize * m_YSize * m_ZSize;
 
 	for (int i = 0; i < size; i++)
@@ -97,6 +93,8 @@ void Chunk::ApplyMesh(const std::vector<Vertex>& opaqueV, const std::vector<unsi
 	m_Loaded = true;
 }
 
+// Getters and setters
+
 unsigned short Chunk::GetBlockLocal(int x, int y, int z) const
 {
 	if (x >= 0 && x < m_XSize &&
@@ -111,7 +109,7 @@ unsigned short Chunk::GetBlockLocal(int x, int y, int z) const
 
 int Chunk::GetHeight(int x, int z) const
 {
-	return m_HeightTable[x * m_ZSize + z];
+	return m_HeightTable[x + m_XSize * z];
 }
 
 void Chunk::SetNeedGeneration(bool state)
@@ -132,4 +130,14 @@ void Chunk::SetNeedRemesh(bool state)
 bool Chunk::GetNeedRemesh() const
 {
 	return m_NeedRemesh;
+}
+
+void Chunk::SetTreeLevel(int level)
+{
+	m_TreeLevel = level;
+}
+
+int Chunk::GetTreeLevel() const
+{
+	return m_TreeLevel;
 }

@@ -3,7 +3,7 @@
 Mesh::Mesh()
 {
     m_BlockTable[0].transparent = true;
-    //m_BlockTable[12].transparent = true;
+    m_BlockTable[12].transparent = true;
 }
 
 Mesh::~Mesh()
@@ -17,8 +17,7 @@ unsigned short Mesh::GetBlockSafe(int x, int y, int z, const Chunk& center, cons
         return 0;
 
     // center
-    if (x >= 0 && x < Chunk::m_XSize &&
-        z >= 0 && z < Chunk::m_ZSize)
+    if (x >= 0 && x < Chunk::m_XSize && z >= 0 && z < Chunk::m_ZSize)
     {
         return center.GetBlockLocal(x, y, z);
     }
@@ -42,24 +41,14 @@ unsigned short Mesh::GetBlockSafe(int x, int y, int z, const Chunk& center, cons
     return 0;
 }
 
-bool Mesh::IsFaceVisible(int x, int y, int z, int face,
-    const Chunk& center,
-    const Chunk* left,
-    const Chunk* right,
-    const Chunk* front,
-    const Chunk* back) const
+bool Mesh::IsFaceVisible(int x, int y, int z, int face, const Chunk& center, const Chunk* left, const Chunk* right, const Chunk* front, const Chunk* back) const
 {
-    // micro-opt (évite glm)
+    // micro-opt (avoid glm)
     static const int dx[6] = { 1,-1,0,0,0,0 };
     static const int dy[6] = { 0,0,1,-1,0,0 };
     static const int dz[6] = { 0,0,0,0,1,-1 };
 
-    unsigned short neighbor = GetBlockSafe(
-        x + dx[face],
-        y + dy[face],
-        z + dz[face],
-        center, left, right, front, back
-    );
+    unsigned short neighbor = GetBlockSafe(x + dx[face], y + dy[face], z + dz[face], center, left, right, front, back);
 
     // safety
     if (neighbor >= 256)
@@ -68,12 +57,8 @@ bool Mesh::IsFaceVisible(int x, int y, int z, int face,
     return m_BlockTable[neighbor].transparent;
 }
 
-void Mesh::AddFaceVerticesAndIndices(const Chunk& chunk,
-    int x, int y, int z,
-    int face,
-    unsigned short blockID,
-    const Atlas* Atlas,
-    bool Transparent)
+// TRANSPARENT MEANS BLENDED HERE
+void Mesh::AddFaceVerticesAndIndices(const Chunk& chunk, int x, int y, int z, int face, unsigned short blockID, const Atlas* Atlas, bool Transparent)
 {
     glm::vec3 basePos = { (float)x, (float)y, (float)z };
 
@@ -88,11 +73,7 @@ void Mesh::AddFaceVerticesAndIndices(const Chunk& chunk,
 
     glm::vec2 uv[4] = { {0,0}, {0,1}, {1,1}, {1,0} };
 
-    glm::vec3 translation = {
-        chunk.GetXWorldPos() * Chunk::m_XSize,
-        0,
-        chunk.GetZWorldPos() * Chunk::m_ZSize
-    };
+    glm::vec3 translation = { chunk.GetXWorldPos() * Chunk::m_XSize, 0, chunk.GetZWorldPos() * Chunk::m_ZSize };
 
     if (!Transparent)
     {
@@ -171,17 +152,11 @@ void Mesh::MeshFromChunk(const Atlas* Atlas, const Chunk& center, const Chunk* l
                 {
                     if (IsFaceVisible(x, y, z, face, center, left, right, front, back))
                     {
-                        bool transparent = (BlockID < 256) ? m_BlockTable[BlockID].transparent : true;
+                        bool blended = (BlockID < 256) ? m_BlockTable[BlockID].blended : true;
 
-                        AddFaceVerticesAndIndices(
-                            center,
-                            x, y, z,
-                            face,
-                            BlockID,
-                            Atlas,
-                            transparent
-                        );
+                        AddFaceVerticesAndIndices(center, x, y, z, face, BlockID, Atlas, blended);
                     }
+
                 }
             }
 }

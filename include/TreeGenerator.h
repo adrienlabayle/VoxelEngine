@@ -11,7 +11,7 @@ class World;
 class TreeGenerator
 {
 public:
-    TreeGenerator(unsigned int seed, int cellSize = 4);
+    TreeGenerator(unsigned int seed, int cellSize = 16);
 
     void GenerateChunkTrees(Chunk& chunk, World& world);
 
@@ -25,7 +25,7 @@ private:
     std::vector<glm::ivec3> m_OutsideLeaves;
 
 private:
-    int Hash(int x, int z) const;
+    int Hash(int x, int z, int i) const;
 
     void PlaceTree(Chunk& chunk, World& world, int worldX, int worldZ, int hash);
 

@@ -48,6 +48,9 @@ public:
     void SetNeedRemesh(bool state);
     bool GetNeedRemesh() const;
 
+    void SetTreeLevel(int level);
+    int GetTreeLevel() const;
+
     inline bool IsMeshReady() const { return m_Loaded; }
 
 private:
@@ -65,6 +68,7 @@ private:
     bool m_Loaded = false;
     bool m_NeedGeneration = false;
     bool m_NeedRemesh = false;
+    int m_TreeLevel = 0;
 
     int m_HeightTable[m_XSize * m_ZSize] = { 0 };
 };

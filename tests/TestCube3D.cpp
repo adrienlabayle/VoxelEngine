@@ -34,7 +34,7 @@ namespace test {
 
         int width, height;
         glfwGetWindowSize(window, &width, &height);
-        m_Proj = glm::perspective(glm::radians(70.0f), (float)width / (float)height, 0.1f, 1000.0f);  // FOV,Width, Height, near, far
+        m_Proj = glm::perspective(glm::radians(70.0f), (float)width / (float)height, 0.1f, 1000.0f);  // FOV, Width, Height, near, far
 
         m_Camera = std::make_unique<Camera>(glm::vec3(0.0f, 140.0f, 0.0f));
 	}
@@ -106,6 +106,7 @@ namespace test {
 
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
         ImGui::Text("Coords : %.1fX   %.1fY   %.1fZ", m_Camera->GetPosition().x, m_Camera->GetPosition().y, m_Camera->GetPosition().z);
+        ImGui::Text("GetHeight(x, z) : %d", m_World->GetHeight((int)std::floor(m_Camera->GetPosition().x), (int)std::floor(m_Camera->GetPosition().z)));
 	}
 
 
