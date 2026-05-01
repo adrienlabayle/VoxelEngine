@@ -22,16 +22,16 @@ float TreeGenerator::RandomFloat(int h) const  // Between 0 and 1
     return (h & 0xFFFF) / (float)0xFFFF;
 }
 
-void TreeGenerator::GenerateChunkTrees(Chunk& chunk, World& world)
+void TreeGenerator::GenerateChunkTrees(int chunkX, int chunkZ, int treeLevel, int* heightTable)
 {
     // We cut the chunk in a 4 by 4 cells grid, then we gonna fill the chunk with pseudo random points and we want to know how mush heach cells have points
     int CellScore[4 * 4] = { 0 };
 
     // We fill the grid with our pseudo random points
-    for (int i = 0; i < std::pow(chunk.GetTreeLevel(), 2); i++) // We add a number of points proportionally to the TreeLevel of the chunk
+    for (int i = 0; i < std::pow(treeLevel, 2); i++) // We add a number of points proportionally to the TreeLevel of the chunk
     {
-        int hx = Hash(chunk.GetXWorldPos(), chunk.GetZWorldPos(), i);
-        int hz = Hash(chunk.GetXWorldPos(), chunk.GetZWorldPos(), i + 1337);
+        int hx = Hash(chunkX, chunkZ, i);
+        int hz = Hash(chunkX, chunkZ, i + 1337);
 
         float pointX = RandomFloat(hx);
         float pointZ = RandomFloat(hz);
@@ -43,7 +43,7 @@ void TreeGenerator::GenerateChunkTrees(Chunk& chunk, World& world)
     }
 
     // Now we place the trees in heach cells according to their points score
-    int h = Hash(chunk.GetXWorldPos(), chunk.GetZWorldPos(), 0);
+    int h = Hash(chunkX, chunkZ, 0);
     for(int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
         {
@@ -52,30 +52,30 @@ void TreeGenerator::GenerateChunkTrees(Chunk& chunk, World& world)
             case 0: // if point score is 0 then the cell will not have any tree
                 break;
             case 1:
-                PlaceTree(chunk, world, i * 4 + 1, j * 4 + 1, h); // if it is 1 then we put one normal tree in the middle top left of the cell 
+                PlaceTree(heightTable, i * 4 + 1, j * 4 + 1, h); // if it is 1 then we put one normal tree in the middle top left of the cell 
                 break;
             case 2:
-                PlaceTree(chunk, world, i * 4 + 2, j * 4 + 1, h); // middle top right
+                PlaceTree(heightTable, i * 4 + 2, j * 4 + 1, h); // middle top right
                 break;
             case 3:
-                PlaceTree(chunk, world, i * 4 + 2, j * 4 + 2, h); // middle bottom right
+                PlaceTree(heightTable, i * 4 + 2, j * 4 + 2, h); // middle bottom right
                 break;
             case 4:
-                PlaceTree(chunk, world, i * 4 + 1, j * 4 + 2, h); // middle bottom left
+                PlaceTree(heightTable, i * 4 + 1, j * 4 + 2, h); // middle bottom left
                 break;
             default:    // if the score is >= 5 we put a big tree in the middle of the cell
-                PlaceTree(chunk, world, i * 4 + 1, j * 4 + 1, h);
-                PlaceTree(chunk, world, i * 4 + 2, j * 4 + 1, h);
-                PlaceTree(chunk, world, i * 4 + 2, j * 4 + 2, h);
-                PlaceTree(chunk, world, i * 4 + 1, j * 4 + 2, h);
+                PlaceTree(heightTable, i * 4 + 1, j * 4 + 1, h);
+                PlaceTree(heightTable, i * 4 + 2, j * 4 + 1, h);
+                PlaceTree(heightTable, i * 4 + 2, j * 4 + 2, h);
+                PlaceTree(heightTable, i * 4 + 1, j * 4 + 2, h);
                 break;
             }
         }
 }
 
-void TreeGenerator::PlaceTree(Chunk& chunk, World& world, int x, int z, int hash)
+void TreeGenerator::PlaceTree(int* heightTable, int x, int z, int hash)
 {
-    int groundY = chunk.GetHeight(x, z);
+    int groundY = heightTable[x + Chunk::m_XSize * z];
 
     if (groundY <= 0) return;
 

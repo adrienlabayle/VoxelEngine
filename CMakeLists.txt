@@ -25,6 +25,7 @@ add_executable(V0.11
     src/TerrainGenerator.cpp
     src/VoronoiNoise.cpp
     src/TreeGenerator.cpp
+    src/Generator.cpp
 
     vendor/stb_image/stb_image.cpp
     vendor/stb_image/stb_image.h
@@ -58,6 +59,7 @@ add_executable(V0.11
     include/TerrainGenerator.h
     include/VoronoiNoise.h
     include/TreeGenerator.h
+    include/Generator.h
 )
 
 file(GLOB TESTS_SOURCES tests/*.cpp)
@@ -95,6 +97,7 @@ source_group(TREE ${CMAKE_SOURCE_DIR} FILES
     src/TerrainGenerator.cpp
     src/VoronoiNoise.cpp
     src/TreeGenerator.cpp
+    src/Generator.cpp
 
     vendor/stb_image/stb_image.cpp
     vendor/stb_image/stb_image.h
@@ -128,6 +131,7 @@ source_group(TREE ${CMAKE_SOURCE_DIR} FILES
     include/TerrainGenerator.h
     include/VoronoiNoise.h
     include/TreeGenerator.h
+    include/Generator.h
 
     ${SHADER_FILES}
 )

@@ -18,6 +18,8 @@
 #include <thread>
 #include <atomic>
 
+enum JobType{ GenerateJobType, MeshJobType };
+
 struct ChunkPosition
 {
 	int x;
@@ -40,16 +42,37 @@ struct ChunkPositionHash
 	}
 };
 
-struct GenerateJob
+struct WorkerJob
 {
+	JobType type;
+
 	ChunkPosition pos;
+
+	// Generate
+
+	// Mesh
+	std::shared_ptr<Chunk> center;
+	std::shared_ptr<Chunk> left;
+	std::shared_ptr<Chunk> right;
+	std::shared_ptr<Chunk> front;
+	std::shared_ptr<Chunk> back;
 };
 
-struct GenerateResult
+struct WorkerResult
 {
+	JobType type;
+
 	ChunkPosition pos;
 
+	// Generate
 	unsigned short m_Blocks[Chunk::m_XSize * Chunk::m_YSize * Chunk::m_ZSize] = { 0 };
+
+	// Mesh
+	std::vector<Vertex> opaqueVertices;
+	std::vector<unsigned int> opaqueIndices;
+
+	std::vector<Vertex> transparentVertices;
+	std::vector<unsigned int> transparentIndices;
 };
 
 struct MeshJob
@@ -108,7 +131,6 @@ private:
 	std::vector<std::shared_ptr<Chunk>> m_OrderedChunks;
 	int m_MaxRemeshPerFrame = 2; // 2 chunks per frame max
 
-	ThreadSafeQueue<GenerateJob> m_GenerateQueue;
 	ThreadSafeQueue<MeshJob> m_MeshQueue;
 	ThreadSafeQueue<MeshResult> m_ResultQueue;
 

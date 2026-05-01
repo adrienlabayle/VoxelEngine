@@ -192,6 +192,7 @@ void World::WorkerLoop()
 
 		auto job = std::move(*jobOpt);
 
+		//if(job.type == Generate)
 		Mesh mesh;
 		mesh.MeshFromChunk(m_Texture.get(), *job.center, job.left.get(), job.right.get(), job.front.get(), job.back.get());
 
