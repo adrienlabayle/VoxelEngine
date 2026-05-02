@@ -25,7 +25,7 @@ public:
     static const int m_ZSize = 16;
 
     void Generate(World& World);
-    void ApplyGenerate(const unsigned short* blocks, const int* heightTable, const int treeLevel);
+    void ApplyGenerate(const std::vector<unsigned short>& blocks, const std::vector<int>& heightTable, const int treeLevel);
     void ApplyMesh(const std::vector<Vertex>& opaqueV, const std::vector<unsigned int>& opaqueI, const std::vector<Vertex>& transparentV, const std::vector<unsigned int>& transparentI);
 
     unsigned short GetBlockLocal(int x, int y, int z) const;

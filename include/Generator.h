@@ -13,9 +13,12 @@ public:
 
 	void GenerateFromChunk();
 
-	const unsigned short* GetBlocks() const;
-	const int* GetHeights() const;
-	const int GetTreeLevel() const;
+	inline const std::vector<unsigned short>& GetBlocks() const { return m_Blocks; }
+	inline const std::vector<int>& GetHeights() const { return m_HeightTable; }
+
+	inline std::vector<unsigned short>&& MoveBlocks() { return std::move(m_Blocks); }
+	inline std::vector<int>&& MoveHeights() { return std::move(m_HeightTable); }
+	inline const int GetTreeLevel() const { return m_TreeLevel; }
 
 private:
 	Noise::PerlinNoise m_PerlinNoise;
@@ -27,7 +30,8 @@ private:
 	int m_ChunkX;
 	int m_ChunkZ;
 
-	unsigned short m_Blocks[Chunk::m_XSize * Chunk::m_YSize * Chunk::m_ZSize] = { 0 };
-	int m_HeightTable[Chunk::m_XSize * Chunk::m_ZSize] = { 0 };
+	std::vector<unsigned short> m_Blocks;
+	std::vector<int> m_HeightTable;
+
 	int m_TreeLevel = 0;
 };

@@ -7,7 +7,7 @@
 TreeGenerator::TreeGenerator(unsigned int seed, int cellSize)
     : m_Seed(seed), m_CellSize(cellSize)
 {
-
+    m_Blocks.resize(Chunk::m_XSize * Chunk::m_YSize * Chunk::m_ZSize, 0);
 }
 
 int TreeGenerator::Hash(int x, int z, int i) const
@@ -22,7 +22,7 @@ float TreeGenerator::RandomFloat(int h) const  // Between 0 and 1
     return (h & 0xFFFF) / (float)0xFFFF;
 }
 
-void TreeGenerator::GenerateChunkTrees(int chunkX, int chunkZ, int treeLevel, int* heightTable)
+void TreeGenerator::GenerateChunkTrees(int chunkX, int chunkZ, int treeLevel, std::vector<int>& heightTable)
 {
     // We cut the chunk in a 4 by 4 cells grid, then we gonna fill the chunk with pseudo random points and we want to know how mush heach cells have points
     int CellScore[4 * 4] = { 0 };
@@ -73,7 +73,7 @@ void TreeGenerator::GenerateChunkTrees(int chunkX, int chunkZ, int treeLevel, in
         }
 }
 
-void TreeGenerator::PlaceTree(int* heightTable, int x, int z, int hash)
+void TreeGenerator::PlaceTree(std::vector<int>& heightTable, int x, int z, int hash)
 {
     int groundY = heightTable[x + Chunk::m_XSize * z];
 

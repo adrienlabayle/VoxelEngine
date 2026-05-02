@@ -8,7 +8,7 @@
 Chunk::Chunk(int XWorldPos, int ZWorldPos, World& World)
 	: m_XWordPos(XWorldPos), m_ZWordPos(ZWorldPos)
 {
-	Generate(World);
+	//Generate(World);
 }
 
 Chunk::~Chunk()
@@ -23,10 +23,10 @@ void Chunk::Generate(World& World) // Used before multithreading implementation,
 	ApplyGenerate(generator.GetBlocks(), generator.GetHeights(), generator.GetTreeLevel());
 }
 
-void Chunk::ApplyGenerate(const unsigned short* blocks, const int* heightTable, const int treeLevel) // can potentially be optimized
+void Chunk::ApplyGenerate(const std::vector<unsigned short>& blocks, const std::vector<int>& heightTable, const int treeLevel) // can potentially be optimized
 {
-	memcpy(m_Blocks, blocks, sizeof(unsigned short) * m_XSize * m_YSize * m_ZSize);
-	memcpy(m_HeightTable, heightTable, sizeof(int) * Chunk::m_XSize * Chunk::m_ZSize);
+	memcpy(m_Blocks, blocks.data(), sizeof(unsigned short) * m_XSize * m_YSize * m_ZSize);
+	memcpy(m_HeightTable, heightTable.data(), sizeof(int) * Chunk::m_XSize * Chunk::m_ZSize);
 	m_TreeLevel = treeLevel;
 }
 

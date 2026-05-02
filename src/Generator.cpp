@@ -9,7 +9,8 @@ Generator::Generator(World& world, int chunkX, int chunkZ)
 	m_TerrainGenerator(TerrainGenerator(chunkX, chunkZ, m_PerlinNoise, m_VoronoiNoise)), 
 	m_TreeGenerator(TreeGenerator(world.GetSeed())), m_ChunkX(chunkX), m_ChunkZ(chunkZ)
 {
-
+	m_Blocks.resize(Chunk::m_XSize * Chunk::m_YSize * Chunk::m_ZSize, 0);
+	m_HeightTable.resize(Chunk::m_XSize * Chunk::m_ZSize, 0);
 }
 
 void Generator::GenerateFromChunk()
@@ -51,7 +52,7 @@ void Generator::GenerateFromChunk()
 
 	m_TreeGenerator.GenerateChunkTrees(m_ChunkX, m_ChunkZ, m_TreeLevel, m_HeightTable);
 
-	const unsigned short* TreesBlocks = m_TreeGenerator.GetBlocks();
+	const std::vector<unsigned short> TreesBlocks = m_TreeGenerator.GetBlocks();
 
 	int size = Chunk::m_XSize * Chunk::m_YSize * Chunk::m_ZSize;
 	for (int i = 0; i < size; i++)
@@ -59,19 +60,4 @@ void Generator::GenerateFromChunk()
 		if (TreesBlocks[i] != 0)
 			m_Blocks[i] = TreesBlocks[i];
 	}
-}
-
-const unsigned short* Generator::GetBlocks() const
-{
-	return m_Blocks;
-}
-
-const int* Generator::GetHeights() const
-{
-	return m_HeightTable;
-}
-
-const int Generator::GetTreeLevel() const
-{
-	return m_TreeLevel;
 }

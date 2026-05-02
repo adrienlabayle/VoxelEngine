@@ -19,7 +19,7 @@ World::~World()
 {
 	m_Stopped = true;
 
-	m_MeshQueue.Stop();     // Wake up workers
+	m_JobQueue.Stop();     // Wake up workers
 	m_ResultQueue.Stop();
 
 	for (auto& t : m_Workers)
@@ -48,7 +48,7 @@ void World::Load(const glm::vec3& CameraChunkPosition)
 		}
 	}
 
-	// Create the missing chunks (put them in NeedRemesh state)
+	// Create the missing chunks (put them in NeedGenerate state)
 	for (int x = -m_RenderDistance; x <= m_RenderDistance; x++)
 		for (int z = -m_RenderDistance; z <= m_RenderDistance; z++)
 		{
@@ -59,32 +59,37 @@ void World::Load(const glm::vec3& CameraChunkPosition)
 				auto newChunk = std::make_shared<Chunk>(pos.x, pos.z, *this);
 				m_Chunks[pos] = newChunk;
 
-				// Put the existing neighbors in "NeedRemesh" state (lambda)
-				auto markNeighbor = [&](int nx, int nz)
-					{
-						ChunkPosition p{ nx, nz };
-						auto it = m_Chunks.find(p);
-						if (it != m_Chunks.end())
-							it->second->SetNeedRemesh(true);
-					};
-
-				markNeighbor(pos.x - 1, pos.z);
-				markNeighbor(pos.x + 1, pos.z);
-				markNeighbor(pos.x, pos.z + 1);
-				markNeighbor(pos.x, pos.z - 1);
-
-				newChunk->SetNeedRemesh(true);
+				newChunk->SetNeedGeneration(true);
 			}
 		}
 
-	// Push jobs (NeedrRemesh -> threads)
+	// Push jobs (NeedGenerate -> threads)
 	int jobCount = 0;
 
 	for (auto& [pos, chunk] : m_Chunks)
 	{
-		if (chunk->GetNeedRemesh() && jobCount < m_MaxRemeshPerFrame)
+		if (chunk->GetNeedGeneration()) // We get read of the m_MaxGeneratePerFrame because we want it to be a priority
 		{
-			MeshJob job;
+			WorkerJob job;
+			job.type = GenerateJobType;
+			job.pos = pos;
+
+			m_JobQueue.Push(std::move(job));
+
+			chunk->SetNeedGeneration(false);
+			jobCount++;
+		}
+	}
+
+	// Push jobs (NeedRemesh -> threads)
+	jobCount = 0;
+
+	for (auto& [pos, chunk] : m_Chunks)
+	{
+		if (!chunk->GetNeedGeneration() && chunk->GetNeedRemesh() && jobCount < m_MaxRemeshPerFrame)
+		{
+			WorkerJob job;
+			job.type = MeshJobType;
 			job.pos = pos;
 			job.center = chunk;
 
@@ -101,13 +106,15 @@ void World::Load(const glm::vec3& CameraChunkPosition)
 			job.front = get(pos.x, pos.z + 1);
 			job.back = get(pos.x, pos.z - 1);
 
-			m_MeshQueue.Push(std::move(job));
+			m_JobQueue.Push(std::move(job));
 
 			chunk->SetNeedRemesh(false);
 			jobCount++;
 		}
 	}
 }
+
+
 
 void World::Draw(const glm::vec3& CameraChunkPosition, const Shader* Shader, const glm::mat4& View, const glm::mat4& Proj)
 {
@@ -121,15 +128,37 @@ void World::Draw(const glm::vec3& CameraChunkPosition, const Shader* Shader, con
 
 		auto& chunk = it->second;
 
-		chunk->ApplyMesh( result->opaqueVertices, result->opaqueIndices, result->transparentVertices, result->transparentIndices);
+		if (result->type == GenerateJobType)
+		{
+			chunk->ApplyGenerate(result->blocks, result->heightTable, result->treeLevel);
+
+			// Put the existing neighbors in "NeedRemesh" state (lambda)
+			ChunkPosition pos = result->pos;
+			auto markNeighbor = [&](int nx, int nz)
+				{
+					ChunkPosition p{ nx, nz };
+					auto it = m_Chunks.find(p);
+					if (it != m_Chunks.end())
+						it->second->SetNeedRemesh(true);
+				};
+
+			markNeighbor(pos.x - 1, pos.z);
+			markNeighbor(pos.x + 1, pos.z);
+			markNeighbor(pos.x, pos.z + 1);
+			markNeighbor(pos.x, pos.z - 1);
+
+			// Put the current generated chunk in "NeedRemesh" state
+			chunk->SetNeedRemesh(true);
+		}
+		else if (result->type == MeshJobType)
+		{
+			chunk->ApplyMesh(result->opaqueVertices, result->opaqueIndices, result->transparentVertices, result->transparentIndices);
+		}
 	}
 
 	Frustum frustum(Proj, View);
 
-	glm::vec2 CamPos = glm::vec2(
-		floor(CameraChunkPosition.x / Chunk::m_XSize),
-		floor(CameraChunkPosition.z / Chunk::m_ZSize)
-	);
+	glm::vec2 CamPos = glm::vec2(floor(CameraChunkPosition.x / Chunk::m_XSize), floor(CameraChunkPosition.z / Chunk::m_ZSize));
 
 	if (CamPos != m_LastCamChunkPos)
 	{
@@ -184,7 +213,7 @@ void World::WorkerLoop()
 {
 	while (true)
 	{
-		auto jobOpt = m_MeshQueue.Pop(); // BLOQUANT
+		auto jobOpt = m_JobQueue.Pop(); // BLOQUANT
 		
 		// securite shutdown (si queue stop)
 		if (!jobOpt)
@@ -192,18 +221,35 @@ void World::WorkerLoop()
 
 		auto job = std::move(*jobOpt);
 
-		//if(job.type == Generate)
-		Mesh mesh;
-		mesh.MeshFromChunk(m_Texture.get(), *job.center, job.left.get(), job.right.get(), job.front.get(), job.back.get());
+		if (job.type == GenerateJobType)
+		{
+			Generator generator(*this, job.pos.x, job.pos.z);
+			generator.GenerateFromChunk();
 
-		MeshResult result;
-		result.pos = job.pos;
-		result.opaqueVertices = mesh.GetOpaqueVertices();
-		result.opaqueIndices = mesh.GetOpaqueIndices();
-		result.transparentVertices = mesh.GetTransparentVertices();
-		result.transparentIndices = mesh.GetTransparentIndices();
+			WorkerResult result;
+			result.type = GenerateJobType;
+			result.pos = job.pos;
+			result.blocks = generator.MoveBlocks();
+			result.heightTable = generator.MoveHeights();
+			result.treeLevel = generator.GetTreeLevel();
 
-		m_ResultQueue.Push(std::move(result));
+			m_ResultQueue.Push(std::move(result));
+		}
+		else if (job.type == MeshJobType)
+		{
+			Mesh mesh;
+			mesh.MeshFromChunk(m_Texture.get(), *job.center, job.left.get(), job.right.get(), job.front.get(), job.back.get());
+
+			WorkerResult result;
+			result.type = MeshJobType;
+			result.pos = job.pos;
+			result.opaqueVertices = mesh.GetOpaqueVertices();
+			result.opaqueIndices = mesh.GetOpaqueIndices();
+			result.transparentVertices = mesh.GetTransparentVertices();
+			result.transparentIndices = mesh.GetTransparentIndices();
+
+			m_ResultQueue.Push(std::move(result));
+		}
 	}
 }
 

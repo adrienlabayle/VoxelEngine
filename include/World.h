@@ -14,6 +14,7 @@
 #include "TreeGenerator.h"
 #include "Frustum.h"
 #include "ThreadSafeQueue.h"
+#include "Generator.h"
 
 #include <thread>
 #include <atomic>
@@ -65,7 +66,9 @@ struct WorkerResult
 	ChunkPosition pos;
 
 	// Generate
-	unsigned short m_Blocks[Chunk::m_XSize * Chunk::m_YSize * Chunk::m_ZSize] = { 0 };
+	std::vector<unsigned short> blocks;
+	std::vector<int> heightTable;
+	int treeLevel;
 
 	// Mesh
 	std::vector<Vertex> opaqueVertices;
@@ -74,7 +77,7 @@ struct WorkerResult
 	std::vector<Vertex> transparentVertices;
 	std::vector<unsigned int> transparentIndices;
 };
-
+/*
 struct MeshJob
 {
 	ChunkPosition pos;
@@ -96,7 +99,7 @@ struct MeshResult
 	std::vector<Vertex> transparentVertices;
 	std::vector<unsigned int> transparentIndices;
 };
-
+*/
 class World
 {
 public:
@@ -129,10 +132,11 @@ private:
 	Noise::VoronoiNoise m_VoronoiNoise;
 
 	std::vector<std::shared_ptr<Chunk>> m_OrderedChunks;
-	int m_MaxRemeshPerFrame = 2; // 2 chunks per frame max
+	//int m_MaxGeneratePerFrame = 2; // 2 generate per frame max  // We dont want this anymore, cause we want the generate part to be a priority
+	int m_MaxRemeshPerFrame = 2; // 2 mesh per frame max
 
-	ThreadSafeQueue<MeshJob> m_MeshQueue;
-	ThreadSafeQueue<MeshResult> m_ResultQueue;
+	ThreadSafeQueue<WorkerJob> m_JobQueue;
+	ThreadSafeQueue<WorkerResult> m_ResultQueue;
 
 	std::vector<std::thread> m_Workers;
 	std::atomic<bool> m_Stopped = false;
