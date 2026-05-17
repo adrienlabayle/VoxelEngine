@@ -5,6 +5,7 @@
 #include "VertexArray.h"
 #include "IndexBuffer.h"
 #include "Shader.h"
+#include "ShaderStorageBuffer.h"
 
 #define ASSERT(x) if (!(x)) __debugbreak();  // ce sont des c++ macros
 #define GLCall(x) GLClearError();\
@@ -20,4 +21,5 @@ class Renderer
 public:
     void Clear() const;
     void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
+    void Draw(const VertexArray& va, const ShaderStorageBuffer& ssbo, const Shader& shader, int vertexCount) const;
 };

@@ -63,26 +63,8 @@ void World::Load(const glm::vec3& CameraChunkPosition)
 			}
 		}
 
-	// Push jobs (NeedGenerate -> threads)
-	int jobCount = 0;
-
-	for (auto& [pos, chunk] : m_Chunks)
-	{
-		if (chunk->GetNeedGeneration()) // We get read of the m_MaxGeneratePerFrame because we want it to be a priority
-		{
-			WorkerJob job;
-			job.type = GenerateJobType;
-			job.pos = pos;
-
-			m_JobQueue.Push(std::move(job));
-
-			chunk->SetNeedGeneration(false);
-			jobCount++;
-		}
-	}
-
 	// Push jobs (NeedRemesh -> threads)
-	jobCount = 0;
+	int jobCount = 0;
 
 	for (auto& [pos, chunk] : m_Chunks)
 	{
@@ -109,6 +91,25 @@ void World::Load(const glm::vec3& CameraChunkPosition)
 			m_JobQueue.Push(std::move(job));
 
 			chunk->SetNeedRemesh(false);
+			jobCount++;
+		}
+	}
+
+	// WE PUT THE GENERATE JOBS AFTER THE MESH JOBS BECAUSE OUR QUEUE ARE LI-FO, AND WE WANT THE GENERATE JOBS TO BE ALLWAYS PRIORITY
+	// Push jobs (NeedGenerate -> threads)
+	jobCount = 0;
+
+	for (auto& [pos, chunk] : m_Chunks)
+	{
+		if (chunk->GetNeedGeneration()) // We get read of the m_MaxGeneratePerFrame because we want it to be a priority
+		{
+			WorkerJob job;
+			job.type = GenerateJobType;
+			job.pos = pos;
+
+			m_JobQueue.Push(std::move(job));
+
+			chunk->SetNeedGeneration(false);
 			jobCount++;
 		}
 	}

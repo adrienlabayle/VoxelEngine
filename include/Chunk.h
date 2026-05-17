@@ -63,7 +63,7 @@ private:
 
     std::unique_ptr<VertexArray> m_TransparentVertexArray = nullptr;
     std::unique_ptr<VertexBuffer> m_TransparentVertexBuffer = nullptr;
-    std::unique_ptr<IndexBuffer> m_TransparentIndexBuffer = nullptr;
+    std::unique_ptr<IndexBuffer> m_TransparentIndexBuffer = nullptr;    
 
     bool m_Loaded = false;
     bool m_NeedGeneration = false;

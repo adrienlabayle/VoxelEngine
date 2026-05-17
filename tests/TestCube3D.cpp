@@ -22,7 +22,7 @@ namespace test {
 
         glEnable(GL_DEPTH_TEST);  // allow opengl to applie depth notion
         
-
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // test, draw only the triangles
 
         m_Shader = std::make_unique<Shader>("res/shaders/Basic.shader");
         m_Shader->Bind();

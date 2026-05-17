@@ -18,8 +18,8 @@ void Generator::GenerateFromChunk()
 {
 	m_TerrainGenerator.InitBiomes();
 
-	for (int x = 0; x < Chunk::m_XSize; x++)
-		for (int z = 0; z < Chunk::m_ZSize; z++)
+	for (int z = 0; z < Chunk::m_ZSize; z++)
+		for (int x = 0; x < Chunk::m_XSize; x++)
 		{
 			int globalX = x + m_ChunkX * Chunk::m_XSize;
 			int globalZ = z + m_ChunkZ * Chunk::m_ZSize;
@@ -50,14 +50,20 @@ void Generator::GenerateFromChunk()
 	// We take the tree level of the chunks central block as the global tree level of the chunk 
 	m_TreeLevel = m_TerrainGenerator.GetBiomeProfile(8 + m_ChunkX * Chunk::m_XSize, 8 + m_ChunkZ * Chunk::m_ZSize).treeLevel;
 
-	m_TreeGenerator.GenerateChunkTrees(m_ChunkX, m_ChunkZ, m_TreeLevel, m_HeightTable);
+	int NeighborsTreeLevel[9];
+	for (int x = 0; x < 3; x++)
+		for (int z = 0; z < 3; z++)
+			NeighborsTreeLevel[z + 3 * x] = m_TerrainGenerator.GetBiomeProfile(8 + (m_ChunkX-1 + x) * Chunk::m_XSize, 8 + (m_ChunkZ - 1 + z) * Chunk::m_ZSize).treeLevel;
+
+	//m_TreeGenerator.GenerateChunkTrees(m_ChunkX, m_ChunkZ, NeighborsTreeLevel[1 + 3 * 1], m_HeightTable);/////////////////////////////////////////////////
+	m_TreeGenerator.GenerateChunkTrees(m_ChunkX, m_ChunkZ, NeighborsTreeLevel, m_TerrainGenerator);
 
 	const std::vector<unsigned short> TreesBlocks = m_TreeGenerator.GetBlocks();
 
 	int size = Chunk::m_XSize * Chunk::m_YSize * Chunk::m_ZSize;
 	for (int i = 0; i < size; i++)
 	{
-		if (TreesBlocks[i] != 0)
+		if (TreesBlocks[i] != 0 && m_Blocks[i] == 0)
 			m_Blocks[i] = TreesBlocks[i];
 	}
 }

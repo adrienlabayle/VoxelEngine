@@ -26,6 +26,8 @@ add_executable(V0.11
     src/VoronoiNoise.cpp
     src/TreeGenerator.cpp
     src/Generator.cpp
+    src/TreeMaker.cpp
+    src/ShaderStorageBuffer.cpp
 
     vendor/stb_image/stb_image.cpp
     vendor/stb_image/stb_image.h
@@ -60,6 +62,8 @@ add_executable(V0.11
     include/VoronoiNoise.h
     include/TreeGenerator.h
     include/Generator.h
+    include/TreeMaker.h
+    include/ShaderStorageBuffer.h
 )
 
 file(GLOB TESTS_SOURCES tests/*.cpp)
@@ -98,6 +102,8 @@ source_group(TREE ${CMAKE_SOURCE_DIR} FILES
     src/VoronoiNoise.cpp
     src/TreeGenerator.cpp
     src/Generator.cpp
+    src/TreeMaker.cpp
+    src/ShaderStorageBuffer.cpp
 
     vendor/stb_image/stb_image.cpp
     vendor/stb_image/stb_image.h
@@ -132,6 +138,8 @@ source_group(TREE ${CMAKE_SOURCE_DIR} FILES
     include/VoronoiNoise.h
     include/TreeGenerator.h
     include/Generator.h
+    include/TreeMaker.h
+    include/ShaderStorageBuffer.h
 
     ${SHADER_FILES}
 )
