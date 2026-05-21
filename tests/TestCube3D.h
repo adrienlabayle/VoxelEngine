@@ -31,6 +31,7 @@ namespace test {
 		std::shared_ptr<Atlas> m_Texture;
 
 		std::unique_ptr<Shader> m_Shader;
+		std::unique_ptr<Shader> m_SsboShader;
 		std::unique_ptr<Camera> m_Camera;
 		std::unique_ptr<World> m_World;
 

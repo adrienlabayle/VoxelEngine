@@ -117,7 +117,7 @@ void World::Load(const glm::vec3& CameraChunkPosition)
 
 
 
-void World::Draw(const glm::vec3& CameraChunkPosition, const Shader* Shader, const glm::mat4& View, const glm::mat4& Proj)
+void World::Draw(const glm::vec3& CameraChunkPosition, Shader* shader, Shader* SsboShader, const glm::mat4& View, const glm::mat4& Proj)
 {
 	Load(CameraChunkPosition);
 
@@ -153,7 +153,7 @@ void World::Draw(const glm::vec3& CameraChunkPosition, const Shader* Shader, con
 		}
 		else if (result->type == MeshJobType)
 		{
-			chunk->ApplyMesh(result->opaqueVertices, result->opaqueIndices, result->transparentVertices, result->transparentIndices);
+			chunk->ApplyMesh(result->opaqueSSBO, result->opaqueVertices, result->opaqueIndices, result->transparentVertices, result->transparentIndices);
 		}
 	}
 
@@ -198,7 +198,13 @@ void World::Draw(const glm::vec3& CameraChunkPosition, const Shader* Shader, con
 
 			if (frustum.IsChunkInFrustum(wx, wz))
 			{
-				m_Renderer->Draw(*chunk->GetOpaqueVertexArray(), *chunk->GetOpaqueIndexBuffer(), *Shader);
+				// Pipeline A
+				SsboShader->Bind();
+				SsboShader->SetUniform3f("u_ChunkWorldPos", wx, 0.0f, wz);
+				m_Renderer->Draw(*chunk->GetOpaqueEmptyVAO(), *chunk->GetOpaqueSSBO(), *SsboShader, chunk->GetOpaqueSSBOIndexCount());
+
+				// Pipeline B
+				//m_Renderer->Draw(*chunk->GetOpaqueVertexArray(), *chunk->GetOpaqueIndexBuffer(), *shader);
 			}
 		}
 	}
@@ -206,7 +212,7 @@ void World::Draw(const glm::vec3& CameraChunkPosition, const Shader* Shader, con
 	// Transparent
 	for (auto& chunk : m_OrderedChunks)
 	{
-		m_Renderer->Draw(*chunk->GetTransparentVertexArray(), *chunk->GetTransparentIndexBuffer(), *Shader);
+		//m_Renderer->Draw(*chunk->GetTransparentVertexArray(), *chunk->GetTransparentIndexBuffer(), *shader);
 	}
 }
 
@@ -244,6 +250,7 @@ void World::WorkerLoop()
 			WorkerResult result;
 			result.type = MeshJobType;
 			result.pos = job.pos;
+			result.opaqueSSBO = mesh.GetOpaqueSSBO();
 			result.opaqueVertices = mesh.GetOpaqueVertices();
 			result.opaqueIndices = mesh.GetOpaqueIndices();
 			result.transparentVertices = mesh.GetTransparentVertices();

@@ -36,7 +36,7 @@ int main(void)
     if (!glfwInit())
         return -1;
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
@@ -66,7 +66,7 @@ int main(void)
 
     ImGui::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init("#version 330");
+    ImGui_ImplOpenGL3_Init("#version 430");
     ImGui::StyleColorsDark();
 
     test::Test* currentTest = nullptr;
@@ -75,7 +75,7 @@ int main(void)
 
     testMenu->RegisterTest<test::TestClearColor>("Clear Color");
     testMenu->RegisterTest<test::TestTexture2D>("2D Texture");
-    testMenu->RegisterTest<test::TestCube3D>("V2");
+    testMenu->RegisterTest<test::TestCube3D>("VoxelEngine");
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -123,6 +123,3 @@ int main(void)
     
     return 0;
 }
-
-
-//12min30

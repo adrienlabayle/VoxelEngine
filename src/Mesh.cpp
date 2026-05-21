@@ -8,6 +8,7 @@ Mesh::Mesh()
 
 Mesh::~Mesh()
 {
+
 }
 
 unsigned short Mesh::GetBlockSafe(int x, int y, int z, const Chunk& center, const Chunk* left, const Chunk* right, const Chunk* front, const Chunk* back) const
@@ -41,7 +42,7 @@ unsigned short Mesh::GetBlockSafe(int x, int y, int z, const Chunk& center, cons
     return 0;
 }
 
-bool Mesh::IsFaceVisible(int x, int y, int z, int face, const Chunk& center, const Chunk* left, const Chunk* right, const Chunk* front, const Chunk* back) const
+unsigned char Mesh::IsFaceVisible(unsigned short blockID, int x, int y, int z, int face, const Chunk& center, const Chunk* left, const Chunk* right, const Chunk* front, const Chunk* back) const
 {
     // micro-opt (avoid glm)
     static const int dx[6] = { 1,-1,0,0,0,0 };
@@ -52,13 +53,30 @@ bool Mesh::IsFaceVisible(int x, int y, int z, int face, const Chunk& center, con
 
     // safety
     if (neighbor >= 256)
-        return true;
+        return 1;
 
-    return m_BlockTable[neighbor].transparent;
+    if (m_BlockTable[neighbor].transparent) // If the neighbor's face is transparent then we gonna have to draw the current face
+    {
+        if (m_BlockTable[blockID].pipelineA)
+            return 1;
+        if (m_BlockTable[blockID].pipelineB)
+            return 2;
+        if (m_BlockTable[blockID].pipelineC)
+            return 3;
+    }
+    return 0;
 }
 
-// TRANSPARENT MEANS BLENDED HERE
-void Mesh::AddFaceVerticesAndIndices(const Chunk& chunk, int x, int y, int z, int face, unsigned short blockID, const Atlas* Atlas, bool Transparent)
+// Add face on the pipeline A (SSBO)
+void Mesh::AddPipelineAFaces(const Chunk& chunk, int x, int y, int z, int face, unsigned short blockID, const Atlas* Atlas)
+{
+    PackedVertex p = PackedVertex::Pack(x, y, z, face, Atlas->GetTextureID(blockID, face), 0);  // No ao for the moment
+
+    m_OpaqueSSBO.push_back(p);
+}
+
+// Add face to the pipeline B or C (VAO/VBO/IBO)
+void Mesh::AddFaceVerticesAndIndices(const Chunk& chunk, int x, int y, int z, int face, unsigned short blockID, const Atlas* Atlas, bool Blended)
 {
     glm::vec3 basePos = { (float)x, (float)y, (float)z };
 
@@ -75,7 +93,7 @@ void Mesh::AddFaceVerticesAndIndices(const Chunk& chunk, int x, int y, int z, in
 
     glm::vec3 translation = { chunk.GetXWorldPos() * Chunk::m_XSize, 0, chunk.GetZWorldPos() * Chunk::m_ZSize };
 
-    if (!Transparent)
+    if (!Blended)
     {
         unsigned int startIndex = m_OpaqueVertices.size();
 
@@ -150,33 +168,19 @@ void Mesh::MeshFromChunk(const Atlas* Atlas, const Chunk& center, const Chunk* l
 
                 for (int face = 0; face < 6; face++)
                 {
-                    if (IsFaceVisible(x, y, z, face, center, left, right, front, back))
+                    int pipeline = IsFaceVisible(BlockID, x, y, z, face, center, left, right, front, back);
+                    if (pipeline != 0)
                     {
-                        bool blended = (BlockID < 256) ? m_BlockTable[BlockID].blended : true;
+                        if (pipeline == 1)
+                            AddPipelineAFaces(center, x, y, z, face, BlockID, Atlas);
+                        else
+                        {
+                            bool blended = (BlockID < 256) ? m_BlockTable[BlockID].blended : true;
 
-                        AddFaceVerticesAndIndices(center, x, y, z, face, BlockID, Atlas, blended);
+                            AddFaceVerticesAndIndices(center, x, y, z, face, BlockID, Atlas, blended);
+                        }
                     }
 
                 }
             }
-}
-
-const std::vector<Vertex>& Mesh::GetOpaqueVertices() const
-{
-    return m_OpaqueVertices;
-}
-
-const std::vector<unsigned int>& Mesh::GetOpaqueIndices() const
-{
-    return m_OpaqueIndices;
-}
-
-const std::vector<Vertex>& Mesh::GetTransparentVertices() const
-{
-    return m_TransparentVertices;
-}
-
-const std::vector<unsigned int>& Mesh::GetTransparentIndices() const
-{
-    return m_TransparentIndices;
 }

@@ -28,7 +28,16 @@ namespace test {
         m_Shader->Bind();
 
         m_Texture = std::make_shared<Atlas>("res/textures/ATLAS.png", 16, 16);  // WATCHOUT it must follow the atlas structure !
+
         m_Shader->SetUniform1i("u_Texture", 0);
+
+        m_SsboShader = std::make_unique<Shader>("res/shaders/Ssbo.shader");
+        m_SsboShader->Bind();
+
+        m_SsboShader->SetUniform1i("u_Texture", 0);
+
+        m_SsboShader->SetUniform2f("u_AtlasTileSize", 1.0f / m_Texture->GetWidth(), 1.0f / m_Texture->GetHeight());
+        m_SsboShader->SetUniform1i("u_AtlasWidth", m_Texture->GetWidth());
 
         m_World = std::make_unique<World>(20, m_Texture, 8); //RenderDistance, Atlas, Seed
 
@@ -94,8 +103,10 @@ namespace test {
         glm::mat4 mvp = m_Proj * m_View * m_Model;
         m_Shader->Bind();
         m_Shader->SetUniformMat4f("u_MVP", mvp);
+        m_SsboShader->Bind();
+        m_SsboShader->SetUniformMat4f("u_MVP", mvp);
 
-        m_World->Draw(m_Camera->GetPosition(), m_Shader.get(), m_Camera->GetViewMatrix(), m_Proj);
+        m_World->Draw(m_Camera->GetPosition(), m_Shader.get(), m_SsboShader.get(), m_Camera->GetViewMatrix(), m_Proj);
 	}
 
 

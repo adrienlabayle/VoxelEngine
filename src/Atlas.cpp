@@ -139,3 +139,123 @@ glm::vec2 Atlas::GetUVCoords(const glm::vec2& baseUV, unsigned short blockID, in
 
     return uv;
 }
+
+int Atlas::GetTextureID(unsigned short blockID, int face) const
+{
+    int TexIndex = 0;
+    switch (blockID)
+    {
+    case 1:  //Grass
+        switch (face)
+        {
+        case 0: case 1: case 4: case 5: // +X, -X, +Z, -Z (side)
+            TexIndex = 1;
+            break;
+        case 2: // +Y (top)
+            TexIndex = 0;
+            break;
+        case 3: // -Y (bottom)
+            TexIndex = 2;
+            break;
+        }
+        break;
+
+    case 2:  //Dirt
+        TexIndex = 2;
+        break;
+
+    case 3:  //Stone
+        TexIndex = 3;
+        break;
+
+    case 4: //Sand
+        TexIndex = 4;
+        break;
+
+    case 5: //Snow
+        switch (face)
+        {
+        case 0: case 1: case 4: case 5: // +X, -X, +Z, -Z (side)
+            TexIndex = 6;
+            break;
+        case 2: // +Y (top)
+            TexIndex = 5;
+            break;
+        case 3: // -Y (bottom)
+            TexIndex = 2;
+            break;
+        }
+        break;
+
+    case 6: //Ice
+        TexIndex = 7;
+        break;
+
+    case 7: //RedSand
+        TexIndex = 8;
+        break;
+
+    case 8: //RedNetherrack
+        switch (face)
+        {
+        case 0: case 1: case 4: case 5: // +X, -X, +Z, -Z (side)
+            TexIndex = 10;
+            break;
+        case 2: // +Y (top)
+            TexIndex = 9;
+            break;
+        case 3: // -Y (bottom)
+            TexIndex = 11;
+            break;
+        }
+        break;
+
+    case 9: //Podzol
+        switch (face)
+        {
+        case 0: case 1: case 4: case 5: // +X, -X, +Z, -Z (side)
+            TexIndex = 13;
+            break;
+        case 2: // +Y (top)
+            TexIndex = 12;
+            break;
+        case 3: // -Y (bottom)
+            TexIndex = 2;
+            break;
+        }
+        break;
+
+    case 10: //Mycelium
+        switch (face)
+        {
+        case 0: case 1: case 4: case 5: // +X, -X, +Z, -Z (side)
+            TexIndex = 15;
+            break;
+        case 2: // +Y (top)
+            TexIndex = 14;
+            break;
+        case 3: // -Y (bottom)
+            TexIndex = 2;
+            break;
+        }
+        break;
+
+    case 11: //Tree
+        switch (face)
+        {
+        case 0: case 1: case 4: case 5: // +X, -X, +Z, -Z (side)
+            TexIndex = 17;
+            break;
+        case 2: case 3: // +Y, -Y (top and bottom)
+            TexIndex = 16;
+            break;
+        }
+        break;
+
+    case 12: //Leaves
+        TexIndex = 18;
+        break;
+    }
+    
+    return TexIndex;
+}

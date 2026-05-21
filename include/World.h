@@ -71,27 +71,7 @@ struct WorkerResult
 	int treeLevel;
 
 	// Mesh
-	std::vector<Vertex> opaqueVertices;
-	std::vector<unsigned int> opaqueIndices;
-
-	std::vector<Vertex> transparentVertices;
-	std::vector<unsigned int> transparentIndices;
-};
-/*
-struct MeshJob
-{
-	ChunkPosition pos;
-
-	std::shared_ptr<Chunk> center;
-	std::shared_ptr<Chunk> left;
-	std::shared_ptr<Chunk> right;
-	std::shared_ptr<Chunk> front;
-	std::shared_ptr<Chunk> back;
-};
-
-struct MeshResult
-{
-	ChunkPosition pos;
+	std::vector<PackedVertex> opaqueSSBO;
 
 	std::vector<Vertex> opaqueVertices;
 	std::vector<unsigned int> opaqueIndices;
@@ -99,7 +79,7 @@ struct MeshResult
 	std::vector<Vertex> transparentVertices;
 	std::vector<unsigned int> transparentIndices;
 };
-*/
+
 class World
 {
 public:
@@ -107,7 +87,7 @@ public:
 	~World();
 
 	void Load(const glm::vec3& CameraChunkPosition);
-	void Draw(const glm::vec3& CameraChunkPosition, const Shader* Shader, const glm::mat4& View, const glm::mat4& Proj);
+	void Draw(const glm::vec3& CameraChunkPosition, Shader* shader, Shader* SsboShader, const glm::mat4& View, const glm::mat4& Proj);
 	void WorkerLoop();
 
 	int GetHeight(int x, int z) const;

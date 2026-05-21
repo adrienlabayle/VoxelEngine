@@ -30,8 +30,22 @@ void Chunk::ApplyGenerate(const std::vector<unsigned short>& blocks, const std::
 	m_TreeLevel = treeLevel;
 }
 
-void Chunk::ApplyMesh(const std::vector<Vertex>& opaqueV, const std::vector<unsigned int>& opaqueI, const std::vector<Vertex>& transparentV, const std::vector<unsigned int>& transparentI)
+void Chunk::ApplyMesh(const std::vector<PackedVertex>& opaqueSSBO,
+	const std::vector<Vertex>& opaqueV, 
+	const std::vector<unsigned int>& opaqueI, 
+	const std::vector<Vertex>& transparentV, 
+	const std::vector<unsigned int>& transparentI)
 {
+	// Pipeline A 
+
+	m_OpaqueEmptyVAO = std::make_unique<VertexArray>();
+	m_OpaqueSSBO = std::make_unique<ShaderStorageBuffer>();
+	m_OpaqueSSBO->SetData(opaqueSSBO.data(), opaqueSSBO.size() * sizeof(PackedVertex));
+
+	m_OpaqueSSBOIndexCount = opaqueSSBO.size() * 6; // We have 4 vertices for heach faces, and so 6 indices for heach faces, thats why we do faces * 6 = indices count
+
+	// Pipeline B and C
+	/*
 	VertexBufferLayout layout;
 	layout.PushVertex();
 
@@ -46,7 +60,7 @@ void Chunk::ApplyMesh(const std::vector<Vertex>& opaqueV, const std::vector<unsi
 	m_TransparentVertexBuffer = std::make_unique<VertexBuffer>(transparentV.data(), transparentV.size() * sizeof(Vertex));
 	m_TransparentVertexArray->AddBuffer(*m_TransparentVertexBuffer, layout);
 	m_TransparentIndexBuffer = std::make_unique<IndexBuffer>(transparentI.data(), transparentI.size());
-
+	*/
 	m_Loaded = true;
 }
 

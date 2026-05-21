@@ -13,4 +13,8 @@ public:
     ~Atlas();
 
     glm::vec2 GetUVCoords(const glm::vec2& baseUV, unsigned short blockID, int face) const;
+    int GetTextureID(unsigned short blockID, int face) const;
+
+    inline int GetWidth() const { return m_AtlasWidth; }
+    inline int GetHeight() const { return m_AtlasHeight; }
 };

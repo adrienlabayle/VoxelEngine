@@ -26,13 +26,21 @@ public:
 
     void Generate(World& World);
     void ApplyGenerate(const std::vector<unsigned short>& blocks, const std::vector<int>& heightTable, const int treeLevel);
-    void ApplyMesh(const std::vector<Vertex>& opaqueV, const std::vector<unsigned int>& opaqueI, const std::vector<Vertex>& transparentV, const std::vector<unsigned int>& transparentI);
+    void ApplyMesh(const std::vector< PackedVertex>& opaqueSSBO,
+        const std::vector<Vertex>& opaqueV, 
+        const std::vector<unsigned int>& opaqueI, 
+        const std::vector<Vertex>& transparentV, 
+        const std::vector<unsigned int>& transparentI);
 
     unsigned short GetBlockLocal(int x, int y, int z) const;
     int GetHeight(int x, int z) const;
 
     inline int GetXWorldPos() const { return m_XWordPos; }
     inline int GetZWorldPos() const { return m_ZWordPos; }
+
+    inline VertexArray* GetOpaqueEmptyVAO() const { return m_OpaqueEmptyVAO.get(); }
+    inline ShaderStorageBuffer* GetOpaqueSSBO() const { return m_OpaqueSSBO.get(); }
+    inline int GetOpaqueSSBOIndexCount() const { return m_OpaqueSSBOIndexCount; }
 
     inline VertexArray* GetOpaqueVertexArray() const { return m_OpaqueVertexArray.get(); }
     inline VertexBuffer* GetOpaqueVertexBuffer() const { return m_OpaqueVertexBuffer.get(); }
@@ -57,6 +65,12 @@ private:
     unsigned short m_Blocks[m_XSize * m_YSize * m_ZSize] = { 0 }; // init with air
     int m_XWordPos, m_ZWordPos;
 
+    // Pipeline A : opaque classic blocks
+    std::unique_ptr<VertexArray> m_OpaqueEmptyVAO = nullptr;
+    std::unique_ptr<ShaderStorageBuffer> m_OpaqueSSBO = nullptr;
+    int m_OpaqueSSBOIndexCount = 0;
+
+    // Pipeline B : transparent or not classic meshed blocks
     std::unique_ptr<VertexArray> m_OpaqueVertexArray = nullptr;
     std::unique_ptr<VertexBuffer> m_OpaqueVertexBuffer = nullptr;
     std::unique_ptr<IndexBuffer> m_OpaqueIndexBuffer = nullptr;
