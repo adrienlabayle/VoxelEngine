@@ -37,7 +37,7 @@ int main(void)
         return -1;
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     /* Create a windowed mode window and its OpenGL context */
@@ -66,7 +66,7 @@ int main(void)
 
     ImGui::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init("#version 430");
+    ImGui_ImplOpenGL3_Init("#version 460");
     ImGui::StyleColorsDark();
 
     test::Test* currentTest = nullptr;

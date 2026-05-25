@@ -15,6 +15,8 @@
 #include "Frustum.h"
 #include "ThreadSafeQueue.h"
 #include "Generator.h"
+#include "MegaSSBO.h"
+#include "DrawIndirectBuffer.h"
 
 #include <thread>
 #include <atomic>
@@ -102,6 +104,11 @@ private:
 	std::unique_ptr<Renderer> m_Renderer;
 
 	std::shared_ptr<Atlas> m_Texture;
+
+	// Buffers
+	MegaSSBO m_MegaSSBO;
+	DrawIndirectBuffer m_DrawIndirectBuffer;
+	VertexArray m_EmptyVAO;
 
 	int m_RenderDistance;
 	unsigned int m_Seed;

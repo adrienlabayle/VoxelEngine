@@ -1,5 +1,5 @@
 #shader vertex
-#version 430 core
+#version 460 core
         
 // SSBO : 1 uint32 par face
 layout(std430, binding = 0) readonly buffer FaceBuffer {
@@ -10,7 +10,6 @@ layout(std430, binding = 0) readonly buffer FaceBuffer {
 uniform mat4 u_MVP;
 uniform vec2 u_AtlasTileSize;  // (1.0/atlasWidth, 1.0/atlasHeight)
 uniform int  u_AtlasWidth;
-uniform vec3 u_ChunkWorldPos;  // position monde du chunk
 
 // Output vers le fragment shader
 out vec2 v_UV;
@@ -70,7 +69,14 @@ void main()
     // Position monde du vertex
     vec3 blockPos  = vec3(bx, by, bz);
     vec3 corner    = faceCorners[faceId][cornerIndex];
-    vec3 worldPos  = u_ChunkWorldPos + blockPos + corner;
+
+    // Decode chunkX and chunkZ from gl_BaseInstance
+    uint base = uint(gl_BaseInstance);
+    int chunkX = int(base & 0xFFFFu) - 32768;
+    int chunkZ = int((base >> 16u) & 0xFFFFu) - 32768;
+    vec3 chunkWorldPos = vec3(float(chunkX) * 16.0, 0.0, float(chunkZ) * 16.0);
+
+    vec3 worldPos  = chunkWorldPos + blockPos + corner;
 
     gl_Position = u_MVP * vec4(worldPos, 1.0);
 
@@ -87,7 +93,7 @@ void main()
 
 
 #shader fragment
-#version 430 core
+#version 460 core
         
 in vec2 v_UV;
 in float v_FaceLight;

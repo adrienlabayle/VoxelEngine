@@ -119,7 +119,11 @@ void World::Load(const glm::vec3& CameraChunkPosition)
 
 void World::Draw(const glm::vec3& CameraChunkPosition, Shader* shader, Shader* SsboShader, const glm::mat4& View, const glm::mat4& Proj)
 {
+	// LOAD PART : 
+
 	Load(CameraChunkPosition);
+
+	// WORKERS RESULTS MANAGING AND UPLOAD GPU/CPU PART : 
 
 	while (auto result = m_ResultQueue.TryPop())
 	{
@@ -153,9 +157,22 @@ void World::Draw(const glm::vec3& CameraChunkPosition, Shader* shader, Shader* S
 		}
 		else if (result->type == MeshJobType)
 		{
+			// If the chunk already had an allocation, we free
+			if (chunk->GetMegaSSBOOffset() != UINT32_MAX)
+				m_MegaSSBO.Free(chunk->GetMegaSSBOOffset(), chunk->GetMegaSSBOFaceCount());
+
+			// New allocation
+			uint32_t faceCount = result->opaqueSSBO.size();
+			uint32_t offset = m_MegaSSBO.Allocate(faceCount);
+
+			m_MegaSSBO.Upload(result->opaqueSSBO.data(), faceCount, offset);
+			chunk->SetMegaSSBO(offset, faceCount);
+
 			chunk->ApplyMesh(result->opaqueSSBO, result->opaqueVertices, result->opaqueIndices, result->transparentVertices, result->transparentIndices);
 		}
 	}
+
+	// FRUSTUM AND MESHED CHUNKS ORDERING PART : 
 
 	Frustum frustum(Proj, View);
 
@@ -188,6 +205,48 @@ void World::Draw(const glm::vec3& CameraChunkPosition, Shader* shader, Shader* S
 		m_LastCamChunkPos = CamPos;
 	}
 
+	// DRAWING PART : 
+
+	// Opaque - indirect drawing
+	m_DrawIndirectBuffer.Clear();
+
+	for (auto& [Pos, chunk] : m_Chunks)
+	{
+		if (!chunk->IsMeshReady()) continue;
+
+		float wx = chunk->GetXWorldPos() * Chunk::m_XSize;
+		float wz = chunk->GetZWorldPos() * Chunk::m_ZSize;
+
+		if (!frustum.IsChunkInFrustum(wx, wz)) continue;
+		if (chunk->GetMegaSSBOFaceCount() == 0) continue;
+
+		// Encode chunkX and chunkZ in 'baseInstance' (16 firt bits for chunkX, those bits are unsigned so we have to add 32768 to endle that, 16 next bits are for chunZ)
+		uint32_t baseInstance = ((uint32_t)(chunk->GetXWorldPos() + 32768) & 0xFFFF) | (((uint32_t)(chunk->GetZWorldPos() + 32768) & 0xFFFF) << 16);
+
+		m_DrawIndirectBuffer.AddCommand(chunk->GetMegaSSBOFaceCount(), chunk->GetMegaSSBOOffset(), baseInstance);
+	}
+	m_DrawIndirectBuffer.Upload();
+	if (m_DrawIndirectBuffer.GetCommandCount() == 0)
+	{
+		m_DrawIndirectBuffer.Bind();
+		return;
+	}
+	/*
+	std::cout << "Commands: " << m_DrawIndirectBuffer.GetCommandCount() << std::endl;///////////////////////////////////////////////////////////
+
+	const auto& commands = m_DrawIndirectBuffer.GetCommands();
+	for (int i = 0; i < commands.size(); i++)
+	{
+		std::cout << "Command " << i << " : count=" << commands[i].count
+			<< " instanceCount=" << commands[i].instanceCount
+			<< " first=" << commands[i].first
+			<< " baseInstance=" << commands[i].baseInstance << std::endl;
+	}
+	*/
+
+	m_Renderer->Draw(m_EmptyVAO, m_MegaSSBO, *SsboShader, m_DrawIndirectBuffer);
+
+	/*
 	// Opaque
 	for (auto& [Pos, chunk] : m_Chunks)
 	{
@@ -208,6 +267,7 @@ void World::Draw(const glm::vec3& CameraChunkPosition, Shader* shader, Shader* S
 			}
 		}
 	}
+	*/
 
 	// Transparent
 	for (auto& chunk : m_OrderedChunks)

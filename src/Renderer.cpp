@@ -36,7 +36,30 @@ void Renderer::Draw(const VertexArray& va, const ShaderStorageBuffer& ssbo, cons
 {
     shader.Bind();
     va.Bind();
-    ssbo.Bind(0);  // binding point 0
+    ssbo.Bind(1);  // binding point 1
 
     GLCall(glDrawArrays(GL_TRIANGLES, 0, vertexCount));
+}
+
+void Renderer::Draw(const VertexArray& va, const MegaSSBO& ssbo, const Shader& shader, const DrawIndirectBuffer& dib) const
+{
+    shader.Bind();
+    va.Bind();
+    ssbo.Bind(0);
+    dib.Bind();
+
+    //GLCall(glMultiDrawArraysIndirect(GL_TRIANGLES, nullptr, dib.GetCommandCount(), 0));
+    // 
+    // Test : remplace glMultiDrawArraysIndirect par une boucle manuelle
+    const auto& commands = dib.GetCommands();
+    for (const auto& cmd : commands)
+    {
+        GLCall(glDrawArraysInstancedBaseInstance(
+            GL_TRIANGLES,
+            cmd.first,
+            cmd.count,
+            cmd.instanceCount,
+            cmd.baseInstance
+        ));
+    }
 }

@@ -28,6 +28,8 @@ add_executable(V0.11
     src/Generator.cpp
     src/TreeMaker.cpp
     src/ShaderStorageBuffer.cpp
+    src/MegaSSBO.cpp
+    src/DrawIndirectBuffer.cpp
 
     vendor/stb_image/stb_image.cpp
     vendor/stb_image/stb_image.h
@@ -64,6 +66,8 @@ add_executable(V0.11
     include/Generator.h
     include/TreeMaker.h
     include/ShaderStorageBuffer.h
+    include/MegaSSBO.h
+    include/DrawIndirectBuffer.h
 )
 
 file(GLOB TESTS_SOURCES tests/*.cpp)
@@ -104,6 +108,8 @@ source_group(TREE ${CMAKE_SOURCE_DIR} FILES
     src/Generator.cpp
     src/TreeMaker.cpp
     src/ShaderStorageBuffer.cpp
+    src/MegaSSBO.cpp
+    src/DrawIndirectBuffer.cpp
 
     vendor/stb_image/stb_image.cpp
     vendor/stb_image/stb_image.h
@@ -140,6 +146,8 @@ source_group(TREE ${CMAKE_SOURCE_DIR} FILES
     include/Generator.h
     include/TreeMaker.h
     include/ShaderStorageBuffer.h
+    include/MegaSSBO.h
+    include/DrawIndirectBuffer.h
 
     ${SHADER_FILES}
 )

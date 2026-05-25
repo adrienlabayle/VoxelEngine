@@ -61,9 +61,19 @@ public:
 
     inline bool IsMeshReady() const { return m_Loaded; }
 
+    // Mega SSBO
+    inline uint32_t GetMegaSSBOOffset() const { return m_MegaSSBOOffset; }
+    inline uint32_t GetMegaSSBOFaceCount() const { return m_MegaSSBOFaceCount; }
+    //inline void SetMegaSSBO(uint32_t offset, uint32_t faceCount) { m_MegaSSBOOffset = offset; m_MegaSSBOFaceCount = faceCount; }
+    void SetMegaSSBO(uint32_t offset, uint32_t faceCount);
+
 private:
     unsigned short m_Blocks[m_XSize * m_YSize * m_ZSize] = { 0 }; // init with air
     int m_XWordPos, m_ZWordPos;
+
+    // Mega SSBO
+    uint32_t m_MegaSSBOOffset = UINT32_MAX; // UINT32_MAX = not allocated yet
+    uint32_t m_MegaSSBOFaceCount = 0;
 
     // Pipeline A : opaque classic blocks
     std::unique_ptr<VertexArray> m_OpaqueEmptyVAO = nullptr;
