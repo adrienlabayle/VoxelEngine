@@ -6,7 +6,7 @@ Camera::Camera(glm::vec3 position)
     : m_Position(position),
     m_Pitch(0.0f),
     m_Yaw(-90.0f),
-    m_Speed(15.0f),
+    m_Speed(45.0f),
     m_Sensitivity(0.1f)
 {
 

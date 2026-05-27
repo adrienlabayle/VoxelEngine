@@ -92,6 +92,7 @@ public:
 	void Draw(const glm::vec3& CameraChunkPosition, Shader* shader, Shader* SsboShader, const glm::mat4& View, const glm::mat4& Proj);
 	void WorkerLoop();
 
+	void CompactMegaSSBO();
 	int GetHeight(int x, int z) const;
 
 	inline const unsigned int GetSeed() const { return m_Seed; }

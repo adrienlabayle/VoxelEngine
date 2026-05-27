@@ -54,12 +54,6 @@ void Renderer::Draw(const VertexArray& va, const MegaSSBO& ssbo, const Shader& s
     const auto& commands = dib.GetCommands();
     for (const auto& cmd : commands)
     {
-        GLCall(glDrawArraysInstancedBaseInstance(
-            GL_TRIANGLES,
-            cmd.first,
-            cmd.count,
-            cmd.instanceCount,
-            cmd.baseInstance
-        ));
+        GLCall(glDrawArraysInstancedBaseInstance(GL_TRIANGLES, cmd.first, cmd.count, cmd.instanceCount, cmd.baseInstance));
     }
 }

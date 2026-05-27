@@ -118,6 +118,4 @@ void Chunk::SetMegaSSBO(uint32_t offset, uint32_t faceCount)
 {
 	m_MegaSSBOOffset = offset; 
 	m_MegaSSBOFaceCount = faceCount;
-
-	//std::cout << "chunk : " << m_XWordPos << ", " << m_ZWordPos << " offset : " << offset << " faceCount : " << faceCount << std::endl;////////////////////////
 }

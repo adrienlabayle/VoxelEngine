@@ -16,6 +16,9 @@ public:
     MegaSSBO();
     ~MegaSSBO();
 
+    void Move(uint32_t srcOffset, uint32_t dstOffset, uint32_t faceCount);
+    void ResetFreeList(uint32_t usedFaces);
+
     // Allocate one bloc for one chunk, return the offset in terme of face nbr
     uint32_t Allocate(uint32_t faceCount);
 

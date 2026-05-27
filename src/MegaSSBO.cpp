@@ -19,6 +19,19 @@ MegaSSBO::~MegaSSBO()
     glDeleteBuffers(1, &m_RendererID);
 }
 
+void MegaSSBO::Move(uint32_t srcOffset, uint32_t dstOffset, uint32_t faceCount)
+{
+    glBindBuffer(GL_COPY_READ_BUFFER, m_RendererID);
+    glBindBuffer(GL_COPY_WRITE_BUFFER, m_RendererID);
+    glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, srcOffset * sizeof(uint32_t), dstOffset * sizeof(uint32_t), faceCount * sizeof(uint32_t)); // Source offset in byte, destination offset in byte, size in byte
+}
+
+void MegaSSBO::ResetFreeList(uint32_t usedFaces)
+{
+    m_FreeList.clear();
+    m_FreeList.push_back({ usedFaces, MAX_FACES - usedFaces });
+}
+
 uint32_t MegaSSBO::Allocate(uint32_t faceCount)
 {
     // First fit : we take the first bloc big enough
@@ -50,7 +63,7 @@ uint32_t MegaSSBO::Allocate(uint32_t faceCount)
 
 void MegaSSBO::Free(uint32_t offset, uint32_t faceCount)
 {
-    // We put back the bloc in the free list, sorted by offset
+    // We put back the bloc in the free list
     auto it = m_FreeList.begin();
     while (it != m_FreeList.end() && it->offset < offset)
         ++it;

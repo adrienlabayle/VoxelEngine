@@ -165,6 +165,13 @@ void World::Draw(const glm::vec3& CameraChunkPosition, Shader* shader, Shader* S
 			uint32_t faceCount = result->opaqueSSBO.size();
 			uint32_t offset = m_MegaSSBO.Allocate(faceCount);
 
+			if (offset == UINT32_MAX) // Here we avoid fragmentation issues in the mega ssbo by stacking all the used data on the start position of the mega ssbo, leaving a single big bloc of place in the other part of the buffer
+			{
+				std::cout << "trying to avoid fragmentation ssbo issues.." << std::endl;///////////////////////////////////////////////////////////////////////
+				CompactMegaSSBO();
+				offset = m_MegaSSBO.Allocate(faceCount); // Retry
+			}
+
 			m_MegaSSBO.Upload(result->opaqueSSBO.data(), faceCount, offset);
 			chunk->SetMegaSSBO(offset, faceCount);
 
@@ -231,18 +238,6 @@ void World::Draw(const glm::vec3& CameraChunkPosition, Shader* shader, Shader* S
 		m_DrawIndirectBuffer.Bind();
 		return;
 	}
-	/*
-	std::cout << "Commands: " << m_DrawIndirectBuffer.GetCommandCount() << std::endl;///////////////////////////////////////////////////////////
-
-	const auto& commands = m_DrawIndirectBuffer.GetCommands();
-	for (int i = 0; i < commands.size(); i++)
-	{
-		std::cout << "Command " << i << " : count=" << commands[i].count
-			<< " instanceCount=" << commands[i].instanceCount
-			<< " first=" << commands[i].first
-			<< " baseInstance=" << commands[i].baseInstance << std::endl;
-	}
-	*/
 
 	m_Renderer->Draw(m_EmptyVAO, m_MegaSSBO, *SsboShader, m_DrawIndirectBuffer);
 
@@ -319,6 +314,29 @@ void World::WorkerLoop()
 			m_ResultQueue.Push(std::move(result));
 		}
 	}
+}
+
+// Dans World
+void World::CompactMegaSSBO()
+{
+	uint32_t writeOffset = 0;
+
+	for (auto& [pos, chunk] : m_Chunks)
+	{
+		if (chunk->GetMegaSSBOOffset() == UINT32_MAX) continue;
+		if (chunk->GetMegaSSBOFaceCount() == 0) continue;
+
+		uint32_t oldOffset = chunk->GetMegaSSBOOffset();
+		uint32_t faceCount = chunk->GetMegaSSBOFaceCount();
+
+		if (oldOffset != writeOffset)
+			m_MegaSSBO.Move(oldOffset, writeOffset, faceCount); // glCopyBufferSubData
+
+		chunk->SetMegaSSBO(writeOffset, faceCount);
+		writeOffset += faceCount;
+	}
+
+	m_MegaSSBO.ResetFreeList(writeOffset); // put back one single free bloc
 }
 
 int World::GetHeight(int x, int z) const
