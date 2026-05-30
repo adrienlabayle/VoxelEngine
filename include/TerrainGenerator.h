@@ -17,6 +17,12 @@ struct BiomeProfile
 	int treeLevel = 0;
 };
 
+struct HeightAndBiome
+{
+    float height;
+    BiomeProfile biome;
+};
+
 class TerrainGenerator
 {
 public:
@@ -41,6 +47,7 @@ public:
 	// Core
 	float GetHeight(int x, int z);
 	BiomeProfile GetBiomeProfile(int x, int z);
+	HeightAndBiome GetHeightAndBiome(int x, int z);
 
 private:
 

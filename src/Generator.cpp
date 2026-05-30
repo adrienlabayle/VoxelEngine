@@ -16,23 +16,24 @@ Generator::Generator(World& world, int chunkX, int chunkZ)
 void Generator::GenerateFromChunk()
 
 {
-	m_TerrainGenerator.InitBiomes();
-
 	for (int z = 0; z < Chunk::m_ZSize; z++)
 		for (int x = 0; x < Chunk::m_XSize; x++)
 		{
 			int globalX = x + m_ChunkX * Chunk::m_XSize;
 			int globalZ = z + m_ChunkZ * Chunk::m_ZSize;
 
+			// Height and biome : 
+			auto [h, biome] = m_TerrainGenerator.GetHeightAndBiome(globalX, globalZ); // optimisation who avoid 2 extra voronoi call
+
 			// Height
-			float h = m_TerrainGenerator.GetHeight(globalX, globalZ);
+			//float h = m_TerrainGenerator.GetHeight(globalX, globalZ);//////////////////////////////////////////////////////////
 			int height = static_cast<int>(h * Chunk::m_YSize + 70);
 			height = std::clamp(height, 0, Chunk::m_YSize - 1);
 
 			m_HeightTable[x + Chunk::m_XSize * z] = height;
 
 			// Biome
-			BiomeProfile biome = m_TerrainGenerator.GetBiomeProfile(globalX, globalZ);
+			//BiomeProfile biome = m_TerrainGenerator.GetBiomeProfile(globalX, globalZ);////////////////////////////////////////////////////////////////
 
 			// Block fill
 			for (int y = height; y >= 0; --y)

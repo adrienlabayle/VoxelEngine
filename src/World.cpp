@@ -13,6 +13,8 @@ World::World(int RenderDistance, std::shared_ptr<Atlas> Atlas, unsigned int Seed
 	{
 		m_Workers.emplace_back(&World::WorkerLoop, this);
 	}
+
+	TerrainGenerator::InitBiomes();
 }
 
 World::~World()
@@ -38,7 +40,7 @@ void World::Load(const glm::vec3& CameraChunkPosition)
 		int dx = it->first.x - ChunkX;
 		int dz = it->first.z - ChunkZ;
 
-		if (std::abs(dx) > m_RenderDistance || std::abs(dz) > m_RenderDistance)
+		if (dx * dx + dz * dz > m_RenderDistance * m_RenderDistance)
 		{
 			it = m_Chunks.erase(it);
 		}
@@ -52,6 +54,8 @@ void World::Load(const glm::vec3& CameraChunkPosition)
 	for (int x = -m_RenderDistance; x <= m_RenderDistance; x++)
 		for (int z = -m_RenderDistance; z <= m_RenderDistance; z++)
 		{
+			if (x * x + z * z > m_RenderDistance * m_RenderDistance) continue; // skip the corners
+
 			ChunkPosition pos = { ChunkX + x, ChunkZ + z };
 
 			if (m_Chunks.find(pos) == m_Chunks.end())
@@ -167,7 +171,6 @@ void World::Draw(const glm::vec3& CameraChunkPosition, Shader* shader, Shader* S
 
 			if (offset == UINT32_MAX) // Here we avoid fragmentation issues in the mega ssbo by stacking all the used data on the start position of the mega ssbo, leaving a single big bloc of place in the other part of the buffer
 			{
-				std::cout << "trying to avoid fragmentation ssbo issues.." << std::endl;///////////////////////////////////////////////////////////////////////
 				CompactMegaSSBO();
 				offset = m_MegaSSBO.Allocate(faceCount); // Retry
 			}
